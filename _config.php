@@ -62,7 +62,7 @@ __('Enable plugin') . '</label></p>
 <p><label class="classic" for="tweakStores_packman">'.
 form::checkbox('tweakStores_packman', 1, $tweakStores_packman) . ' ' .
 __('Enable packman behaviors') . '</label></p>
-<p class="form-note">' . __('If enabled, plugin pacKman (re)generate dcstore.xml at root directory of the plugin.') .'</p>
+<p class="form-note">' . __('If enabled, plugin pacKman (re)generate on the fly dcstore.xml file at root directory of the module.') .'</p>
 
 <p><label class="classic" for="tweakStores_file_pattern">'. __('Predictable URL to zip file on the external repository') .
 form::field('tweakStores_file_pattern', 65, 255, $tweakStores_file_pattern, 'maximal') . ' 

@@ -91,9 +91,9 @@ class tweakStoresBehaviors
 /*
         echo 
         '<form method="post" action="' . $page_url . '" id="fetchxml" class="fieldset">' .
-        '<h4>' . __('Update an existing plugin') . '</h4>' .
-        '<p>' . __('Put URL to a dcstore.xml file for selected plugin to update it.') . '</p>' . 
-        '<p class="field"><label for="xml_id" class="classic required"><abbr title="' . __('Required field') . '">*</abbr> ' . __('Plugin to update:') . '</label> ' .
+        '<h4>' . __('Update an existing module') . '</h4>' .
+        '<p>' . __('Put URL to a dcstore.xml file for selected module to update it.') . '</p>' . 
+        '<p class="field"><label for="xml_id" class="classic required"><abbr title="' . __('Required field') . '">*</abbr> ' . __('Module to update:') . '</label> ' .
         form::combo('xml_id', $combo) .
         '</p>' .
         '<p class="field"><label for="xml_url" class="classic required"><abbr title="' . __('Required field') . '">*</abbr> ' . __('XML file URL:') . '</label> ' .
