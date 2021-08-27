@@ -1,8 +1,8 @@
 # README
 
-## WHAT IS FAC ?
+## WHAT IS TWEAKSTORES ?
 
-"dcStoreTools" is a plugin for the open-source 
+"tweakStores" is a plugin for the open-source 
 web publishing software called Dotclear.
 
 It add options to the sidebar of post edition page 
@@ -10,23 +10,23 @@ to link en extenal feed to the bottom of an entry.
 
 ## REQUIREMENTS
 
- fac requires: 
+ tweakStores requires: 
 
   * superadmin permissions
   * Dotclear 2.19 
 
 ## USAGE
 
-First install dcStoreTools, manualy from a zip package or from 
+First install tweakStores, manualy from a zip package or from 
 Dotaddict repository. (See Dotclear's documentation to know how do this)
 
 Manage manual installation or overwriting from tab "store tools" on plugins page.
 Manage settings from plugins configuration page.
-dcStoreTools can interact with plugin pacKman to create .xml file at
+tweakStores can interact with plugin pacKman to create .xml file at
 package creation.
 
 ## MORE
 
  * License : GNU GPL v2
- * Source & contribution : [GitHub Page](https://github.com/JcDenis/dcStoreTools)
- * Packages & details:  [Dotaddict Page](https://plugins.dotaddict.org/dc2/details/dcStoreTools)
+ * Source & contribution : [GitHub Page](https://github.com/JcDenis/tweakStores)
+ * Packages & details:  [Dotaddict Page](https://plugins.dotaddict.org/dc2/details/tweakStores)
