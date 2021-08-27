@@ -5,8 +5,7 @@
 "tweakStores" is a plugin for the open-source 
 web publishing software called Dotclear.
 
-It add options to the sidebar of post edition page 
-to link en extenal feed to the bottom of an entry.
+It help devs to manage dcstore.xml file.
 
 ## REQUIREMENTS
 
