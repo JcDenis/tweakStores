@@ -105,38 +105,38 @@ class tweakStores
 
         # name
         if (empty($module['name'])) {
-            self::$failed[] = 'no module name';
+            self::$failed[] = 'no module name set in _define.php';
         }
         $xml[] = sprintf('<name>%s</name>', html::escapeHTML($module['name']));
 
         # version
         if (empty($module['version'])) {
-            self::$failed[] = 'no module version';
+            self::$failed[] = 'no module version set in _define.php';
         }
         $xml[] = sprintf('<version>%s</version>', html::escapeHTML($module['version']));
 
         # author
         if (empty($module['author'])) {
-            self::$failed[] = 'no module author';
+            self::$failed[] = 'no module author set in _define.php';
 
         }
         $xml[] = sprintf('<author>%s</author>', html::escapeHTML($module['author']));
 
         # desc
         if (empty($module['desc'])) {
-            self::$failed[] = 'no module description';
+            self::$failed[] = 'no module description set in _define.php';
         }
         $xml[] = sprintf('<desc>%s</desc>', html::escapeHTML($module['desc']));
 
         # repository
         if (empty($module['repository'])) {
-            self::$failed[] = 'no repository';
+            self::$failed[] = 'no repository set in _define.php';
         }
 
         # file
         $file_pattern = self::parseFilePattern($id, $module, $file_pattern);
         if (empty($file_pattern)) {
-            self::$failed[] = 'no zip file pattern';
+            self::$failed[] = 'no zip file pattern set in Tweak Store configuration';
         }
         $xml[] = sprintf('<file>%s</file>', html::escapeHTML($file_pattern));
 
@@ -169,6 +169,7 @@ class tweakStores
 
     public static function writeXML($id, $module, $file_pattern)
     {
+        self::$failed = [];
         if (!$module['root_writable']) {
             return false;
         }
