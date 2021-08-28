@@ -57,11 +57,10 @@ class tweakStoresBehaviors
     protected static function modulesToolsTabs(dcCore $core, $modules, $excludes, $page_url)
     {
         $file_pattern = $core->blog->settings->tweakStores->file_pattern;
-        $modules = new ArrayObject($modules);
         $combo = self::comboModules($modules, $excludes);
 
         # generate xml code
-        if (!empty($_POST['buildxml_id']) && $modules->offsetExists($_POST['buildxml_id'])) {
+        if (!empty($_POST['buildxml_id']) && in_array($_POST['buildxml_id'], $combo)) {
             $xml_content = tweakStores::generateXML($_POST['buildxml_id'], $modules[$_POST['buildxml_id']], $file_pattern);
         }
 
@@ -173,12 +172,11 @@ class tweakStoresBehaviors
     }
 
     # create list of module for combo and remove official modules
-    protected static function comboModules(arrayObject $modules, $excludes)
+    protected static function comboModules($modules, array $excludes)
     {
         $combo = [ __('Select a module') => '0'];
         foreach ($modules as $id => $module) {
-            if (is_array($excludes) && in_array($id, $excludes)) {
-                $modules->offsetUnset($id);
+            if (in_array($id, $excludes)) {
                 continue;
             }
             $combo[$module['name'] . ' '. $module['version']] = $id;
