@@ -21,6 +21,7 @@ class tweakStores
     {
         $label = empty($module['label']) ? $id : $module['label'];
         $name  = __(empty($module['name']) ? $label : $module['name']);
+        $oname  = empty($module['name']) ? $label : $module['name'];
 
         return array_merge(
             # Default values
@@ -42,7 +43,7 @@ class tweakStores
                 'sshot'             => '',
                 'score'             => 0,
                 'type'              => null,
-                'require'           => [],
+                'requires'          => [],
                 'settings'          => [],
                 'repository'        => '',
                 'dc_min'            => 0
@@ -55,6 +56,7 @@ class tweakStores
                 'sid'   => self::sanitizeString($id),
                 'label' => $label,
                 'name'  => $name,
+                'oname' => $oname,
                 'sname' => self::sanitizeString($name)
             ]
         );
@@ -107,7 +109,7 @@ class tweakStores
         if (empty($module['name'])) {
             self::$failed[] = 'no module name set in _define.php';
         }
-        $xml[] = sprintf('<name>%s</name>', html::escapeHTML($module['name']));
+        $xml[] = sprintf('<name>%s</name>', html::escapeHTML($module['oname']));
 
         # version
         if (empty($module['version'])) {
@@ -140,11 +142,23 @@ class tweakStores
         }
         $xml[] = sprintf('<file>%s</file>', html::escapeHTML($file_pattern));
 
-        # dc_min
+        # da dc_min or requires core
+        if (!empty($>module['requires']) && is_array($module['requires'])) {
+            foreach ($module['requires'] as $req) {
+                if (!is_array($req)) {
+                    $req = [$req];
+                }
+                if ($req[0] == 'core') {
+                    $module['dc_min'] = $req[1];
+                    break;
+                }
+            }
+        }
         if (empty($module['dc_min'])) {
             self::$notice[] = 'no minimum dotclear version';
+        } else {
+            $xml[] = sprintf('<da:dcmin>%s</da:dcmin>', html::escapeHTML($module['dc_min']));
         }
-        $xml[] = sprintf('<da:dcmin>%s</da:dcmin>', html::escapeHTML($module['dc_min']));
 
         # details
         if (empty($module['details'])) {
