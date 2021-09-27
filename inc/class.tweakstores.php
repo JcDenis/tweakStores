@@ -196,7 +196,7 @@ class tweakStores
             return false;
         }
         try {
-            files::putContent($module['root'] . '/dcstore.xml', $content);
+            files::putContent($module['root'] . '/dcstore.xml', str_replace('><', ">\n<", $content));
         } catch(Exception $e) {
             self::$failed[] = $e->getMessage();
             return false;
