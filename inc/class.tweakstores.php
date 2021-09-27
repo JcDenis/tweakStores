@@ -95,7 +95,7 @@ class tweakStores
         }
         $module = self::sanitizeModule($id, $module);
         $rsp = new xmlTag('module');
-    
+
         self::$notice = [];
         self::$failed = [];
 

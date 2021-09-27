@@ -1,15 +1,15 @@
 <?php
-# -- BEGIN LICENSE BLOCK ----------------------------------
-#
-# This file is part of tweakStores, a plugin for Dotclear 2.
-# 
-# Copyright (c) 2009-2021 Jean-Christian Denis and contributors
-# 
-# Licensed under the GPL version 2.0 license.
-# A copy of this license is available in LICENSE file or at
-# http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-#
-# -- END LICENSE BLOCK ------------------------------------
+/**
+ * @brief tweakStores, a plugin for Dotclear 2
+ * 
+ * @package Dotclear
+ * @subpackage Plugin
+ * 
+ * @author Jean-Christian Denis and Contributors
+ * 
+ * @copyright Jean-Christian Denis
+ * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
+ */
 
 if (!defined('DC_CONTEXT_MODULE')) {
     return null;
@@ -41,8 +41,7 @@ if (!empty($_POST['save'])) {
             __('Configuration has been successfully updated.')
         );
         http::redirect(
-            $list->getURL('module=tweakStores&conf=1&redir=' .
-            $list->getRedir())
+            $list->getURL('module=tweakStores&conf=1&redir=' . $list->getRedir())
         );
     } catch (Exception $e) {
         $core->error->add($e->getMessage());
@@ -54,12 +53,12 @@ echo '
 <div class="fieldset">
 <h4>' . __('Tweak store') . '</h4>
 
-<p><label class="classic" for="tweakStores_active">'.
+<p><label class="classic" for="tweakStores_active">' .
 form::checkbox('tweakStores_active', 1, $tweakStores_active) . ' ' .
 __('Enable plugin') . '</label></p>
 <p class="form-note">' . __('If enabled, new tab "Tweak stores" allows your to perfom actions relative to third-party repositories.') .'</p>
 
-<p><label class="classic" for="tweakStores_packman">'.
+<p><label class="classic" for="tweakStores_packman">' .
 form::checkbox('tweakStores_packman', 1, $tweakStores_packman) . ' ' .
 __('Enable packman behaviors') . '</label></p>
 <p class="form-note">' . __('If enabled, plugin pacKman (re)generate on the fly dcstore.xml file at root directory of the module.') .'</p>
