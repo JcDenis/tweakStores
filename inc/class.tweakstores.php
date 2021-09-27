@@ -1,15 +1,15 @@
 <?php
-# -- BEGIN LICENSE BLOCK ----------------------------------
-#
-# This file is part of tweakStores, a plugin for Dotclear 2.
-# 
-# Copyright (c) 2009-2021 Jean-Christian Denis and contributors
-# 
-# Licensed under the GPL version 2.0 license.
-# A copy of this license is available in LICENSE file or at
-# http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-#
-# -- END LICENSE BLOCK ------------------------------------
+/**
+ * @brief tweakStores, a plugin for Dotclear 2
+ * 
+ * @package Dotclear
+ * @subpackage Plugin
+ * 
+ * @author Jean-Christian Denis and Contributors
+ * 
+ * @copyright Jean-Christian Denis
+ * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
+ */
 
 class tweakStores
 {
@@ -94,41 +94,41 @@ class tweakStores
             return false;
         }
         $module = self::sanitizeModule($id, $module);
-
+        $rsp = new xmlTag('module');
+    
         self::$notice = [];
         self::$failed = [];
-        $xml = ['<modules xmlns:da="http://dotaddict.org/da/">'];
 
         # id
         if (empty($module['id'])) {
             self::$failed[] = 'unknow module';
         }
-        $xml[] = sprintf('<module id="%s">', html::escapeHTML($module['id']));
+        $rsp->id = $module['id'];
 
         # name
         if (empty($module['name'])) {
             self::$failed[] = 'no module name set in _define.php';
         }
-        $xml[] = sprintf('<name>%s</name>', html::escapeHTML($module['oname']));
+        $rsp->name($module['oname']);
 
         # version
         if (empty($module['version'])) {
             self::$failed[] = 'no module version set in _define.php';
         }
-        $xml[] = sprintf('<version>%s</version>', html::escapeHTML($module['version']));
+        $rsp->version($module['version']);
 
         # author
         if (empty($module['author'])) {
             self::$failed[] = 'no module author set in _define.php';
 
         }
-        $xml[] = sprintf('<author>%s</author>', html::escapeHTML($module['author']));
+        $rsp->author($module['author']);
 
         # desc
         if (empty($module['desc'])) {
             self::$failed[] = 'no module description set in _define.php';
         }
-        $xml[] = sprintf('<desc>%s</desc>', html::escapeHTML($module['desc']));
+        $rsp->desc($module['desc']);
 
         # repository
         if (empty($module['repository'])) {
@@ -140,10 +140,10 @@ class tweakStores
         if (empty($file_pattern)) {
             self::$failed[] = 'no zip file pattern set in Tweak Store configuration';
         }
-        $xml[] = sprintf('<file>%s</file>', html::escapeHTML($file_pattern));
+        $rsp->file($file_pattern);
 
         # da dc_min or requires core
-        if (!empty($>module['requires']) && is_array($module['requires'])) {
+        if (!empty($module['requires']) && is_array($module['requires'])) {
             foreach ($module['requires'] as $req) {
                 if (!is_array($req)) {
                     $req = [$req];
@@ -157,28 +157,32 @@ class tweakStores
         if (empty($module['dc_min'])) {
             self::$notice[] = 'no minimum dotclear version';
         } else {
-            $xml[] = sprintf('<da:dcmin>%s</da:dcmin>', html::escapeHTML($module['dc_min']));
+            $rsp->insertNode(new xmlTag('da:dcmin', $module['dc_min']));
         }
 
         # details
         if (empty($module['details'])) {
             self::$notice[] = 'no details URL';
+        } else {
+            $rsp->insertNode(new xmlTag('da:details', $module['details']));
         }
-        $xml[] = sprintf('<da:details>%s</da:details>', html::escapeHTML($module['details']));
 
         # section
-        $xml[] = sprintf('<da:section>%s</da:section>', html::escapeHTML($module['section']));
+        if (!empty($module['section'])) {
+            $rsp->insertNode(new xmlTag('da:section', $module['section']));
+        }
 
         # support
         if (empty($module['support'])) {
             self::$notice[] = 'no support URL';
+        } else {
+            $rsp->insertNode(new xmlTag('da:support', $module['support']));
         }
-        $xml[] = sprintf('<da:support>%s</da:support>', html::escapeHTML($module['support']));
 
-        $xml[] = '</module>';
-        $xml[] = '</modules>';
+        $res = new xmlTag('modules', $rsp);
+        $res->insertAttr('xmlns:da', 'http://dotaddict.org/da/');
 
-        return implode("\n", $xml);
+        return $res->toXML();
     }
 
     public static function writeXML($id, $module, $file_pattern)
