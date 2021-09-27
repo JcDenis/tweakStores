@@ -1,15 +1,15 @@
 <?php
-# -- BEGIN LICENSE BLOCK ----------------------------------
-#
-# This file is part of tweakStores, a plugin for Dotclear 2.
-# 
-# Copyright (c) 2009-2021 Jean-Christian Denis and contributors
-# 
-# Licensed under the GPL version 2.0 license.
-# A copy of this license is available in LICENSE file or at
-# http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
-#
-# -- END LICENSE BLOCK ------------------------------------
+/**
+ * @brief tweakStores, a plugin for Dotclear 2
+ * 
+ * @package Dotclear
+ * @subpackage Plugin
+ * 
+ * @author Jean-Christian Denis and Contributors
+ * 
+ * @copyright Jean-Christian Denis
+ * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
+ */
 
 if (!defined('DC_CONTEXT_ADMIN')) {
     return null;
@@ -56,8 +56,10 @@ class tweakStoresBehaviors
     # generic page tab
     protected static function modulesToolsTabs(dcCore $core, $modules, $excludes, $page_url)
     {
-        $file_pattern = $core->blog->settings->tweakStores->file_pattern;
         $combo = self::comboModules($modules, $excludes);
+
+        # zip file url pattern
+        $file_pattern = $core->blog->settings->tweakStores->file_pattern;
 
         # generate xml code
         if (!empty($_POST['buildxml_id']) && in_array($_POST['buildxml_id'], $combo)) {
@@ -75,11 +77,17 @@ class tweakStoresBehaviors
                 }
             }
         }
-
         echo
         '<div class="multi-part" id="tweakStores" title="' . __('Tweak stores') . '">' .
         '<h3>' . __('Tweak third-party repositories') . '</h3>';
 
+        if (!empty($_POST['write_xml'])) {
+            if ($core->error->flag()) {
+                echo '<p class="error">' . implode(' ', $core->error->getErrors()) . '</p>';
+            } else {
+                echo '<p class="success">' . __('File successfully write') . '</p>';
+            }
+        }
         if (count($combo) < 2) {
             echo 
             '<div class="info">' . __('There are no module to tweak') . '</div>' .
@@ -87,65 +95,44 @@ class tweakStoresBehaviors
 
             return;
         }
-/*
-        echo 
-        '<form method="post" action="' . $page_url . '" id="fetchxml" class="fieldset">' .
-        '<h4>' . __('Update an existing module') . '</h4>' .
-        '<p>' . __('Put URL to a dcstore.xml file for selected module to update it.') . '</p>' . 
-        '<p class="field"><label for="xml_id" class="classic required"><abbr title="' . __('Required field') . '">*</abbr> ' . __('Module to update:') . '</label> ' .
-        form::combo('xml_id', $combo) .
-        '</p>' .
-        '<p class="field"><label for="xml_url" class="classic required"><abbr title="' . __('Required field') . '">*</abbr> ' . __('XML file URL:') . '</label> ' .
-        form::field('xml_url', 40, 255, [
-            'extra_html' => 'required placeholder="' . __('URL') . '"'
-        ]) .
-        '</p>' .
-        '<p class="field"><label for="your_pwd1" class="classic required"><abbr title="' . __('Required field') . '">*</abbr> ' . __('Your password:') . '</label> ' .
-        form::password(['your_pwd', 'your_pwd1'], 20, 255,
-            [
-                'extra_html'   => 'required placeholder="' . __('Password') . '"',
-                'autocomplete' => 'current-password'
-            ]
-        ) . '</p>' .
-        '<p><input type="submit" name="fetch_xml" value="' . __('Update') . '" />' .
-        $core->formNonce() . '</p>' .
-        '</form>';
-//*/
-        echo 
-        '<form method="post" action="' . $page_url . '" id="buildxml" class="fieldset">' .
-        '<h4>' . __('Generate xml code') . '</h4>' .
-        '<p>' . __('This help to generate content of dcstore.xml for seleted module.') . '</p>' .
-        '<p class="field"><label for="buildxml_id" class="classic required"><abbr title="' . __('Required field') . '">*</abbr> ' . __('Module to parse:') . '</label> ' .
-        form::combo('buildxml_id', $combo, empty($_POST['buildxml_id']) ? '-' : html::escapeHTML($_POST['buildxml_id'])) .
-        '</p>' .
-        '<p><input type="submit" name="build_xml" value="' . __('Generate') . '" />' .
-        $core->formNonce() . '</p>' .
-        '</form>';
-
+        if (empty($file_pattern)) {
+            echo sprintf(
+                '<p class="info"><a href="%s">%s</a></p>',
+                $core->adminurl->get('admin.plugins', ['module' => 'tweakStores', 'conf' => 1, 'redir' => $page_url]),
+                __('You must configure zip file pattern to complete xml code automaticaly.')
+            );
+        } else {
+            echo 
+            '<form method="post" action="' . $page_url . '" id="buildxml" class="fieldset">' .
+            '<h4>' . __('Generate xml code') . '</h4>' .
+            '<p>' . __('This help to generate content of dcstore.xml for seleted module.') . '</p>' .
+            '<p class="field"><label for="buildxml_id" class="classic required"><abbr title="' . __('Required field') . '">*</abbr> ' . __('Module to parse:') . '</label> ' .
+            form::combo('buildxml_id', $combo, empty($_POST['buildxml_id']) ? '-' : html::escapeHTML($_POST['buildxml_id'])) .
+            '</p>' .
+            '<p><input type="submit" name="build_xml" value="' . __('Generate') . '" />' .
+            $core->formNonce() . '</p>' .
+            '</form>';
+        }
         if (!empty($_POST['buildxml_id'])) {
             echo 
             '<form method="post" action="' . $page_url . '" id="writexml" class="fieldset">' .
             '<h4>' . sprintf(__('Generated code for module : %s'), html::escapeHTML($_POST['buildxml_id'])) . '</h4>';
 
             if (!empty(tweakStores::$failed)) {
-                echo sprintf('<div class="warn">' . __('Failed to parse XML code : %s') . '</div>', implode(', ', tweakStores::$failed));
+                echo '<p class="info">' . sprintf(__('Failed to parse XML code: %s'), implode(', ', tweakStores::$failed)) . '</p>';
             }
             if (!empty(tweakStores::$notice)) {
-                echo sprintf('<div class="info">' . __('Code is not fully filled : %s') . '</div>', implode(', ', tweakStores::$notice));
+                echo '<p class="info">' . sprintf(__('Code is not fully filled: %s'), implode(', ', tweakStores::$notice)) . '</p>';
             }
             if (!empty($xml_content)) {
                 if (empty(tweakStores::$failed) && empty(tweakStores::$notice)) {
-                    echo '<div class="success">' . __('Code is complete') . '</div>';
+                    echo '<p class="info">' . __('Code is complete') . '</p>';
                 }
                 echo
-                '<pre>' . form::textArea('gen_xml', 165, 14, html::escapeHTML($xml_content), 'maximal') . '</pre>';
+                '<pre>' . form::textArea('gen_xml', 165, 14, html::escapeHTML(str_replace('><', ">\n<", $xml_content)), 'maximal') . '</pre>';
 
                 if (!empty($file_pattern) && $modules[$_POST['buildxml_id']]['root_writable'] && $core->auth->isSuperAdmin()) {
-                    if ($core->error->flag()) {
-                        echo '<div class="error">' . implode(' ', $core->error->getErrors()) . '</div>';
-                    } elseif (!empty($_POST['write_xml'])) {
-                        echo '<div class="success">' . __('File successfully write') . '</div>';
-                    }
+
                     echo 
                     '<p class="field"><label for="your_pwd2" class="classic required"><abbr title="' . __('Required field') . '">*</abbr> ' . __('Your password:') . '</label> ' .
                     form::password(['your_pwd', 'your_pwd2'], 20, 255,
@@ -155,19 +142,19 @@ class tweakStoresBehaviors
                         ]
                     ) . '</p>' .
                     '<p><input type="submit" name="write_xml" value="' . __('Save to module directory') . '" />' .
-                    form::hidden('buildxml_id', $_POST['buildxml_id']);
+                    form::hidden('buildxml_id', $_POST['buildxml_id']) . 
+                    $core->formNonce() . '</p>';
                 }
+                echo sprintf(
+                    '<p class="info"><a href="%s">%s</a></p>',
+                    $core->adminurl->get('admin.plugins', ['module' => 'tweakStores', 'conf' => 1, 'redir' => $page_url]),
+                    __('You can edit zip file pattern from configuration page.')
+                );
             }
             echo
-            '<p>' . $core->formNonce() . '</p>' .
             '</form>';
         }
         echo 
-        '<p><a href="' . $core->adminurl->get('admin.plugins', ['module' => 'tweakStores', 'conf' => 1, 'redir' => $page_url]) .'">' .
-        (empty($file_pattern) ?
-            __('You must configure zip file pattern to complete xml code automaticaly.') :
-            __('You can edit zip file pattern from configuration page.')
-        ). '</a></p>' .
         '</div>';
     }
 
