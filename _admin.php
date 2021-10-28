@@ -119,10 +119,10 @@ class tweakStoresBehaviors
             '<h4>' . sprintf(__('Generated code for module : %s'), html::escapeHTML($_POST['buildxml_id'])) . '</h4>';
 
             if (!empty(tweakStores::$failed)) {
-                echo '<p class="info">' . sprintf(__('Failed to parse XML code: %s'), implode(', ', tweakStores::$failed)) . '</p>';
+                echo '<p class="info">' . sprintf(__('Failed to parse XML code: %s'), implode(', ', tweakStores::$failed)) . '</p> ';
             }
             if (!empty(tweakStores::$notice)) {
-                echo '<p class="info">' . sprintf(__('Code is not fully filled: %s'), implode(', ', tweakStores::$notice)) . '</p>';
+                echo '<p class="info">' . sprintf(__('Code is not fully filled: %s'), implode(', ', tweakStores::$notice)) . '</p> ';
             }
             if (!empty($xml_content)) {
                 if (empty(tweakStores::$failed) && empty(tweakStores::$notice)) {
@@ -131,8 +131,10 @@ class tweakStoresBehaviors
                 echo
                 '<pre>' . form::textArea('gen_xml', 165, 14, html::escapeHTML(str_replace('><', ">\n<", $xml_content)), 'maximal') . '</pre>';
 
-                if (!empty($file_pattern) && $modules[$_POST['buildxml_id']]['root_writable'] && $core->auth->isSuperAdmin()) {
-
+                if (empty(tweakStores::$failed) 
+                    && $modules[$_POST['buildxml_id']]['root_writable'] 
+                    && $core->auth->isSuperAdmin()
+                ) {
                     echo 
                     '<p class="field"><label for="your_pwd2" class="classic required"><abbr title="' . __('Required field') . '">*</abbr> ' . __('Your password:') . '</label> ' .
                     form::password(['your_pwd', 'your_pwd2'], 20, 255,
