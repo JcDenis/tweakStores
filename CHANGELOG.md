@@ -1,6 +1,7 @@
 0.2.x
 - add update from external repositories
 - fix permissions
+- add copy to clipboard button
 
 0.2.0 - 2021.09.28
 - use xmlTag() to manage file content
