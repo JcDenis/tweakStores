@@ -1,16 +1,15 @@
 <?php
 /**
  * @brief tweakStores, a plugin for Dotclear 2
- * 
+ *
  * @package Dotclear
  * @subpackage Plugin
- * 
+ *
  * @author Jean-Christian Denis and Contributors
- * 
+ *
  * @copyright Jean-Christian Denis
  * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
-
 class tweakStores
 {
     public static $notice = [];
@@ -21,7 +20,7 @@ class tweakStores
     {
         $label = empty($module['label']) ? $id : $module['label'];
         $name  = __(empty($module['name']) ? $label : $module['name']);
-        $oname  = empty($module['name']) ? $label : $module['name'];
+        $oname = empty($module['name']) ? $label : $module['name'];
 
         return array_merge(
             # Default values
@@ -71,6 +70,7 @@ class tweakStores
     public static function parseFilePattern($id, $module, $file_pattern)
     {
         $module = self::sanitizeModule($id, $module);
+
         return text::tidyURL(str_replace(
             [
                 '%type%',
@@ -94,7 +94,7 @@ class tweakStores
             return false;
         }
         $module = self::sanitizeModule($id, $module);
-        $rsp = new xmlTag('module');
+        $rsp    = new xmlTag('module');
 
         self::$notice = [];
         self::$failed = [];
@@ -120,7 +120,6 @@ class tweakStores
         # author
         if (empty($module['author'])) {
             self::$failed[] = 'no module author set in _define.php';
-
         }
         $rsp->author($module['author']);
 
@@ -150,6 +149,7 @@ class tweakStores
                 }
                 if ($req[0] == 'core') {
                     $module['dc_min'] = $req[1];
+
                     break;
                 }
             }
@@ -195,12 +195,15 @@ class tweakStores
         if (!empty(self::$failed)) {
             return false;
         }
+
         try {
             files::putContent($module['root'] . '/dcstore.xml', str_replace('><', ">\n<", $content));
-        } catch(Exception $e) {
+        } catch (Exception $e) {
             self::$failed[] = $e->getMessage();
+
             return false;
         }
+
         return true;
     }
 }
