@@ -13,16 +13,16 @@ msgstr ""
 msgid "Tweak third-party repositories"
 msgstr "Gestion de dépôts tiers"
 
-msgid "File successfully write"
+msgid "File successfully written"
 msgstr "Fichier enregistré avec succès"
 
-msgid "There are no module to tweak"
+msgid "There is no module to tweak"
 msgstr "Il n'y a pas de module à gérer"
 
 msgid "Generate xml code"
 msgstr "Générer le code XML"
 
-msgid "This help to generate content of dcstore.xml for seleted module."
+msgid "This helps to generate content of dcstore.xml for seleted module."
 msgstr "Ceci aide à générer le contenu du fichier dcstore.xml pour le module selectionné."
 
 msgid "Module to parse:"
@@ -31,8 +31,8 @@ msgstr "Module à traiter :"
 msgid "Generate"
 msgstr "Générer"
 
-msgid "Generated code for module : %s"
-msgstr "Code généré pour le module \"%s"
+msgid "Generated code for module: %s"
+msgstr "Code généré pour le module : %s"
 
 msgid "Failed to parse XML code: %s"
 msgstr "Impossible de traiter le code XML : %s"
@@ -46,7 +46,7 @@ msgstr "Le code est complet"
 msgid "Save to module directory"
 msgstr "Enregistrer dans le répertoire du module"
 
-msgid "You must configure zip file pattern to complete xml code automaticaly."
+msgid "You must configure zip file pattern to complete xml code automatically."
 msgstr "Vous devez configurer le modèle de fichier zip pour compléter le code XML automatiquement."
 
 msgid "You can edit zip file pattern from configuration page."
@@ -56,13 +56,13 @@ msgid "Select a module"
 msgstr "Sélectionner un module"
 
 msgid "If enabled, new tab \"Tweak stores\" allows your to perfom actions relative to third-party repositories."
-msgstr "Si activé, un nouvel onglet \"Tweak stores\" vous permettra de mené des actions relatives aux dépôts tiers."
+msgstr "Si activé, un nouvel onglet \"Tweak stores\" vous permettra de mener des actions relatives aux dépôts tiers."
 
 msgid "Enable packman behaviors"
 msgstr "Activer les comportements avec pacKman"
 
-msgid "If enabled, plugin pacKman (re)generate on the fly dcstore.xml file at root directory of the module."
-msgstr "Si activé, le plugin pacKman (re)génèrera à la volé le fichier dcstore.xml"
+msgid "If enabled, plugin pacKman will (re)generate on the fly dcstore.xml file at root directory of the module."
+msgstr "Si activé, le plugin pacKman (re)génèrera à la volée le fichier dcstore.xml"
 
 msgid "Predictable URL to zip file on the external repository"
 msgstr "URL prédictive du fichier zip sur le dépôt externe"
@@ -70,9 +70,9 @@ msgstr "URL prédictive du fichier zip sur le dépôt externe"
 msgid "You can use widcard like %author%, %type%, %id%, %version%."
 msgstr "Vous pouvez utiliser les remplacements automatiques tels que %author%, %type%, %id%, %version%."
 
-msgid "For exemple on github https://github.com/MyGitName/%id%/releases/download/v%version%/%type%-%id%.zip"
+msgid "For example on github https://github.com/MyGitName/%id%/releases/download/v%version%/%type%-%id%.zip"
 msgstr "Par exemple sur github https://github.com/MyGitName/%id%/releases/download/v%version%/%type%-%id%.zip"
 
-msgid "Note on github, you must create a release and join to it the module zip file."
-msgstr "Note sur github, you devez créer un release et y joindre le fichier zip du module."
+msgid "Note: on github, you must create a release and join to it the module zip file."
+msgstr "Note : sur github, vous devez créer un release et y joindre le fichier zip du module."
 
