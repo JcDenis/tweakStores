@@ -1,7 +1,7 @@
 dev
 - [ ] add update from external repositories
 
-0.3.0 - 2021.11.05
+0.3.1 - 2021.11.05
 - fix permissions
 - add copy to clipboard button
 - add check third party repository
