@@ -1,7 +1,10 @@
-0.2.x
-- add update from external repositories
+dev
+- [ ] add update from external repositories
+
+0.3.0 - 2021.11.05
 - fix permissions
 - add copy to clipboard button
+- add check third party repository
 
 0.2.0 - 2021.09.28
 - use xmlTag() to manage file content
