@@ -79,12 +79,12 @@ class tweakStoresBehaviors
                 try {
                     if (function_exists('curl_init')) {
                         $ch = curl_init();
-                        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+                        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
                         curl_setopt($ch, CURLOPT_HEADER, false);
                         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
                         curl_setopt($ch, CURLOPT_URL, $modules[$_POST['checkxml_id']]['repository']);
                         curl_setopt($ch, CURLOPT_REFERER, $modules[$_POST['checkxml_id']]['repository']);
-                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                         $file_content = curl_exec($ch);
                         curl_close($ch);
                     } else {
