@@ -85,12 +85,12 @@ class tweakStoresBehaviors
             if ($core->error->flag()) {
                 echo '<p class="error">' . implode(' ', $core->error->getErrors()) . '</p>';
             } else {
-                echo '<p class="success">' . __('File successfully write') . '</p>';
+                echo '<p class="success">' . __('File successfully written') . '</p>';
             }
         }
         if (count($combo) < 2) {
             echo 
-            '<div class="info">' . __('There are no module to tweak') . '</div>' .
+            '<div class="info">' . __('There is no module to tweak') . '</div>' .
             '</div>';
 
             return;
@@ -99,13 +99,13 @@ class tweakStoresBehaviors
             echo sprintf(
                 '<p class="info"><a href="%s">%s</a></p>',
                 $core->adminurl->get('admin.plugins', ['module' => 'tweakStores', 'conf' => 1, 'redir' => $page_url]),
-                __('You must configure zip file pattern to complete xml code automaticaly.')
+                __('You must configure zip file pattern to complete xml code automatically.')
             );
         } else {
             echo 
             '<form method="post" action="' . $page_url . '" id="buildxml" class="fieldset">' .
             '<h4>' . __('Generate xml code') . '</h4>' .
-            '<p>' . __('This help to generate content of dcstore.xml for seleted module.') . '</p>' .
+            '<p>' . __('This helps to generate content of dcstore.xml for seleted module.') . '</p>' .
             '<p class="field"><label for="buildxml_id" class="classic required"><abbr title="' . __('Required field') . '">*</abbr> ' . __('Module to parse:') . '</label> ' .
             form::combo('buildxml_id', $combo, empty($_POST['buildxml_id']) ? '-' : html::escapeHTML($_POST['buildxml_id'])) .
             '</p>' .
@@ -116,7 +116,7 @@ class tweakStoresBehaviors
         if (!empty($_POST['buildxml_id'])) {
             echo 
             '<form method="post" action="' . $page_url . '" id="writexml" class="fieldset">' .
-            '<h4>' . sprintf(__('Generated code for module : %s'), html::escapeHTML($_POST['buildxml_id'])) . '</h4>';
+            '<h4>' . sprintf(__('Generated code for module: %s'), html::escapeHTML($_POST['buildxml_id'])) . '</h4>';
 
             if (!empty(tweakStores::$failed)) {
                 echo '<p class="info">' . sprintf(__('Failed to parse XML code: %s'), implode(', ', tweakStores::$failed)) . '</p> ';

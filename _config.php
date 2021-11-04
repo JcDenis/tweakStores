@@ -61,15 +61,15 @@ __('Enable plugin') . '</label></p>
 <p><label class="classic" for="tweakStores_packman">' .
 form::checkbox('tweakStores_packman', 1, $tweakStores_packman) . ' ' .
 __('Enable packman behaviors') . '</label></p>
-<p class="form-note">' . __('If enabled, plugin pacKman (re)generate on the fly dcstore.xml file at root directory of the module.') .'</p>
+<p class="form-note">' . __('If enabled, plugin pacKman will (re)generate on the fly dcstore.xml file at root directory of the module.') .'</p>
 
 <p><label class="classic" for="tweakStores_file_pattern">'. __('Predictable URL to zip file on the external repository') .
 form::field('tweakStores_file_pattern', 65, 255, $tweakStores_file_pattern, 'maximal') . ' 
 </label></p>
 <p class="form-note">' . 
 __('You can use widcard like %author%, %type%, %id%, %version%.') . '<br /> ' .
-__('For exemple on github https://github.com/MyGitName/%id%/releases/download/v%version%/%type%-%id%.zip') . '<br />' .
-__('Note on github, you must create a release and join to it the module zip file.') . '
+__('For example on github https://github.com/MyGitName/%id%/releases/download/v%version%/%type%-%id%.zip') . '<br />' .
+__('Note: on github, you must create a release and join to it the module zip file.') . '
 </p>
 
 </div>';
