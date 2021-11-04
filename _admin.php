@@ -1,16 +1,15 @@
 <?php
 /**
  * @brief tweakStores, a plugin for Dotclear 2
- * 
+ *
  * @package Dotclear
  * @subpackage Plugin
- * 
+ *
  * @author Jean-Christian Denis and Contributors
- * 
+ *
  * @copyright Jean-Christian Denis
  * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
-
 if (!defined('DC_CONTEXT_ADMIN')) {
     return null;
 }
@@ -30,11 +29,21 @@ if (!$core->blog->settings->tweakStores->active) {
 if ($core->blog->settings->tweakStores->packman) {
     $core->addBehavior('packmanBeforeCreatePackage', ['tweakStoresBehaviors', 'packmanBeforeCreatePackage']);
 }
+$core->addBehavior('pluginsToolsHeaders', ['tweakStoresBehaviors', 'modulesToolsHeaders']);
+$core->addBehavior('themesToolsHeaders', ['tweakStoresBehaviors', 'modulesToolsHeaders']);
 $core->addBehavior('pluginsToolsTabs', ['tweakStoresBehaviors', 'pluginsToolsTabs']);
 $core->addBehavior('themesToolsTabs', ['tweakStoresBehaviors', 'themesToolsTabs']);
 
 class tweakStoresBehaviors
 {
+    # addd some js
+    public static function modulesToolsHeaders(dcCore $core, $plugin)
+    {
+        return
+            dcPage::jsVars(['dotclear.ts_copied' => __('Copied to clipboard')]) .
+            dcPage::jsLoad(dcPage::getPF('tweakStores/js/admin.js'));
+    }
+
     # create dcstore.xml file on the fly when pack a module
     public static function packmanBeforeCreatePackage(dcCore $core, $module)
     {
@@ -44,13 +53,13 @@ class tweakStoresBehaviors
     # admin plugins page tab
     public static function pluginsToolsTabs(dcCore $core)
     {
-        self::modulesToolsTabs($core, $core->plugins->getModules(), explode(',', DC_DISTRIB_PLUGINS), $core->adminurl->get('admin.plugins').'#tweakStores');
+        self::modulesToolsTabs($core, $core->plugins->getModules(), explode(',', DC_DISTRIB_PLUGINS), $core->adminurl->get('admin.plugins') . '#tweakStores');
     }
 
     # admin themes page tab
     public static function themesToolsTabs(dcCore $core)
     {
-        self::modulesToolsTabs($core, $core->themes->getModules(), explode(',', DC_DISTRIB_THEMES), $core->adminurl->get('admin.blog.theme').'#tweakStores');
+        self::modulesToolsTabs($core, $core->themes->getModules(), explode(',', DC_DISTRIB_THEMES), $core->adminurl->get('admin.blog.theme') . '#tweakStores');
     }
 
     # generic page tab
@@ -89,7 +98,7 @@ class tweakStoresBehaviors
             }
         }
         if (count($combo) < 2) {
-            echo 
+            echo
             '<div class="info">' . __('There is no module to tweak') . '</div>' .
             '</div>';
 
@@ -102,7 +111,7 @@ class tweakStoresBehaviors
                 __('You must configure zip file pattern to complete xml code automatically.')
             );
         } else {
-            echo 
+            echo
             '<form method="post" action="' . $page_url . '" id="buildxml" class="fieldset">' .
             '<h4>' . __('Generate xml code') . '</h4>' .
             '<p>' . __('This helps to generate content of dcstore.xml for seleted module.') . '</p>' .
@@ -114,7 +123,7 @@ class tweakStoresBehaviors
             '</form>';
         }
         if (!empty($_POST['buildxml_id'])) {
-            echo 
+            echo
             '<form method="post" action="' . $page_url . '" id="writexml" class="fieldset">' .
             '<h4>' . sprintf(__('Generated code for module: %s'), html::escapeHTML($_POST['buildxml_id'])) . '</h4>';
 
@@ -131,20 +140,24 @@ class tweakStoresBehaviors
                 echo
                 '<pre>' . form::textArea('gen_xml', 165, 14, html::escapeHTML(str_replace('><', ">\n<", $xml_content)), 'maximal') . '</pre>';
 
-                if (empty(tweakStores::$failed) 
-                    && $modules[$_POST['buildxml_id']]['root_writable'] 
+                if (empty(tweakStores::$failed)
+                    && $modules[$_POST['buildxml_id']]['root_writable']
                     && $core->auth->isSuperAdmin()
                 ) {
-                    echo 
+                    echo
                     '<p class="field"><label for="your_pwd2" class="classic required"><abbr title="' . __('Required field') . '">*</abbr> ' . __('Your password:') . '</label> ' .
-                    form::password(['your_pwd', 'your_pwd2'], 20, 255,
+                    form::password(
+                        ['your_pwd', 'your_pwd2'],
+                        20,
+                        255,
                         [
                             'extra_html'   => 'required placeholder="' . __('Password') . '"',
                             'autocomplete' => 'current-password'
                         ]
                     ) . '</p>' .
-                    '<p><input type="submit" name="write_xml" value="' . __('Save to module directory') . '" />' .
-                    form::hidden('buildxml_id', $_POST['buildxml_id']) . 
+                    '<p><input type="submit" name="write_xml" value="' . __('Save to module directory') . '" /> ' .
+                    '<a class="hidden-if-no-js button" href="#tweakStores" id="ts_copy_button">' . __('Copy to clipboard') . '</a>' .
+                    form::hidden('buildxml_id', $_POST['buildxml_id']) .
                     $core->formNonce() . '</p>';
                 }
                 echo sprintf(
@@ -156,20 +169,21 @@ class tweakStoresBehaviors
             echo
             '</form>';
         }
-        echo 
+        echo
         '</div>';
     }
 
     # create list of module for combo and remove official modules
     protected static function comboModules($modules, array $excludes)
     {
-        $combo = [ __('Select a module') => '0'];
+        $combo = [__('Select a module') => '0'];
         foreach ($modules as $id => $module) {
             if (in_array($id, $excludes)) {
                 continue;
             }
-            $combo[$module['name'] . ' '. $module['version']] = $id;
+            $combo[$module['name'] . ' ' . $module['version']] = $id;
         }
+
         return $combo;
     }
 }
