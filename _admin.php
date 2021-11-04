@@ -77,18 +77,22 @@ class tweakStoresBehaviors
                 $file_content = __('This module has no repository set in its _define.php file.');
             } else {
                 try {
+                    $url = $modules[$_POST['checkxml_id']]['repository'];
+                    if (false === strpos($url, 'dcstore.xml')) {
+                        $url .= '/dcstore.xml';
+                    }
                     if (function_exists('curl_init')) {
                         $ch = curl_init();
                         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
                         curl_setopt($ch, CURLOPT_HEADER, false);
                         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                        curl_setopt($ch, CURLOPT_URL, $modules[$_POST['checkxml_id']]['repository']);
-                        curl_setopt($ch, CURLOPT_REFERER, $modules[$_POST['checkxml_id']]['repository']);
+                        curl_setopt($ch, CURLOPT_URL, $url);
+                        curl_setopt($ch, CURLOPT_REFERER, $url);
                         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                         $file_content = curl_exec($ch);
                         curl_close($ch);
                     } else {
-                        $file_content = file_get_contents($modules[$_POST['checkxml_id']]['repository']);
+                        $file_content = file_get_contents($url);
                     }
                 } catch (Exception $e) {
                     $file_content = __('Failed to read third party repository');
