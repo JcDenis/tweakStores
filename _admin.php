@@ -36,18 +36,18 @@ $core->addBehavior('themesToolsTabs', ['tweakStoresBehaviors', 'themesToolsTabs'
 
 class tweakStoresBehaviors
 {
+    # create dcstore.xml file on the fly when pack a module
+    public static function packmanBeforeCreatePackage(dcCore $core, $module)
+    {
+        tweakStores::writeXML($module['id'], $module, $core->blog->settings->tweakStores->file_pattern);
+    }
+
     # addd some js
     public static function modulesToolsHeaders(dcCore $core, $plugin)
     {
         return
             dcPage::jsVars(['dotclear.ts_copied' => __('Copied to clipboard')]) .
             dcPage::jsLoad(dcPage::getPF('tweakStores/js/admin.js'));
-    }
-
-    # create dcstore.xml file on the fly when pack a module
-    public static function packmanBeforeCreatePackage(dcCore $core, $module)
-    {
-        tweakStores::writeXML($module['id'], $module, $core->blog->settings->tweakStores->file_pattern);
     }
 
     # admin plugins page tab
@@ -69,6 +69,32 @@ class tweakStoresBehaviors
 
         # zip file url pattern
         $file_pattern = $core->blog->settings->tweakStores->file_pattern;
+
+        # check dcstore repo
+        $file_content = '';
+        if (!empty($_POST['checkxml_id']) && in_array($_POST['checkxml_id'], $combo)) {
+            if (empty($modules[$_POST['checkxml_id']]['repository'])) {
+                $file_content = __('This module has no repository set in its _define.php file.');
+            } else {
+                try {
+                    if (function_exists('curl_init')) {
+                        $ch = curl_init();
+                        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+                        curl_setopt($ch, CURLOPT_HEADER, false);
+                        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                        curl_setopt($ch, CURLOPT_URL, $modules[$_POST['checkxml_id']]['repository']);
+                        curl_setopt($ch, CURLOPT_REFERER, $modules[$_POST['checkxml_id']]['repository']);
+                        curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+                        $file_content = curl_exec($ch);
+                        curl_close($ch);
+                    } else {
+                        $file_content = file_get_contents($modules[$_POST['checkxml_id']]['repository']);
+                    }
+                } catch (Exception $e) {
+                    $file_content = __('Failed to read third party repository');
+                }
+            }
+        }
 
         # generate xml code
         if (!empty($_POST['buildxml_id']) && in_array($_POST['buildxml_id'], $combo)) {
@@ -104,9 +130,33 @@ class tweakStoresBehaviors
 
             return;
         }
+
+        echo
+        '<form method="post" action="' . $page_url . '" id="checkxml" class="fieldset">' .
+        '<h4>' . __('Check repository') . '</h4>' .
+        '<p>' . __('This checks if dcstore.xml file is present on third party repository.') . '</p>' .
+        '<p class="field"><label for="buildxml_id" class="classic required"><abbr title="' . __('Required field') . '">*</abbr> ' . __('Module to parse:') . '</label> ' .
+        form::combo('checkxml_id', $combo, empty($_POST['checkxml_id']) ? '-' : html::escapeHTML($_POST['checkxml_id'])) .
+        '</p>' .
+        '<p><input type="submit" name="check_xml" value="' . __('Check') . '" />' .
+        $core->formNonce() . '</p>' .
+        '</form>';
+
+        if (!empty($file_content)) {
+            echo
+            '<div class="fieldset">' .
+            '<h4>' . __('Repositiory contents') . '</h4>' .
+            '<pre>' . form::textArea('file_xml', 165, 14, [
+                'default'    => html::escapeHTML(str_replace('><', ">\n<", $file_content)),
+                'class'      => 'maximal',
+                'extra_html' => 'readonly="true"'
+            ]) . '</pre>' .
+            '</div>';
+        }
+
         if (empty($file_pattern)) {
             echo sprintf(
-                '<p class="info"><a href="%s">%s</a></p>',
+                '<div class="fieldset"><h4>' . __('Generate xml code') . '</h4><p class="info"><a href="%s">%s</a></p></div>',
                 $core->adminurl->get('admin.plugins', ['module' => 'tweakStores', 'conf' => 1, 'redir' => $page_url]),
                 __('You must configure zip file pattern to complete xml code automatically.')
             );
@@ -138,7 +188,11 @@ class tweakStoresBehaviors
                     echo '<p class="info">' . __('Code is complete') . '</p>';
                 }
                 echo
-                '<pre>' . form::textArea('gen_xml', 165, 14, html::escapeHTML(str_replace('><', ">\n<", $xml_content)), 'maximal') . '</pre>';
+                '<pre>' . form::textArea('gen_xml', 165, 14, [
+                    'default'    => html::escapeHTML(str_replace('><', ">\n<", $xml_content)),
+                    'class'      => 'maximal',
+                    'extra_html' => 'readonly="true"'
+                ]) . '</pre>';
 
                 if (empty(tweakStores::$failed)
                     && $modules[$_POST['buildxml_id']]['root_writable']

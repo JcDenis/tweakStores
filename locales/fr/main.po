@@ -3,7 +3,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Project-Id-Version: tweakStores 0.2.0\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-11-04T10:06:45+00:00\n"
+"PO-Revision-Date: 2021-11-04T23:40:14+00:00\n"
 "Last-Translator: Jean-Christian Denis\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -12,6 +12,12 @@ msgstr ""
 
 msgid "Copied to clipboard"
 msgstr "Copié dans le presse-papier"
+
+msgid "This module has no repository set in its _define.php file."
+msgstr "Ce module n'a aucun dépôt tiers définie dans son fichier _define.php"
+
+msgid "Failed to read third party repository"
+msgstr "Impossible de lire le dépôt tiers"
 
 msgid "Tweak third-party repositories"
 msgstr "Gestion de dépôts tiers"
@@ -22,17 +28,26 @@ msgstr "Fichier enregistré avec succès"
 msgid "There is no module to tweak"
 msgstr "Il n'y a pas de module à gérer"
 
-msgid "You must configure zip file pattern to complete xml code automatically."
-msgstr "Vous devez configurer le modèle de fichier zip pour compléter le code XML automatiquement."
+msgid "This checks if dcstore.xml file is present on third party repository."
+msgstr "Ceci vérifie la présence du fichier dcstore.xml sur le dépôt tiers."
+
+msgid "Module to parse:"
+msgstr "Module à traiter :"
+
+msgid "Check"
+msgstr "Obtenir"
+
+msgid "Repositiory contents"
+msgstr "Contenu du dépôts tiers"
 
 msgid "Generate xml code"
 msgstr "Générer le code XML"
 
+msgid "You must configure zip file pattern to complete xml code automatically."
+msgstr "Vous devez configurer le modèle de fichier zip pour compléter le code XML automatiquement."
+
 msgid "This helps to generate content of dcstore.xml for seleted module."
 msgstr "Ceci aide à générer le contenu du fichier dcstore.xml pour le module selectionné."
-
-msgid "Module to parse:"
-msgstr "Module à traiter :"
 
 msgid "Generate"
 msgstr "Générer"
