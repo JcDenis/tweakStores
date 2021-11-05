@@ -40,5 +40,6 @@ package creation.
 ## CONTRIBUTORS
 
  * Jean-Christian Denis
+ * Phillipe aka Dissitou
 
  You are welcome to contribute to this code.
