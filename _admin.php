@@ -71,10 +71,10 @@ class tweakStoresBehaviors
         $file_pattern = $core->blog->settings->tweakStores->file_pattern;
 
         # check dcstore repo
-        $file_content = '';
+        $url = '';
         if (!empty($_POST['checkxml_id']) && in_array($_POST['checkxml_id'], $combo)) {
             if (empty($modules[$_POST['checkxml_id']]['repository'])) {
-                $file_content = __('This module has no repository set in its _define.php file.');
+                $url = __('This module has no repository set in its _define.php file.');
             } else {
                 try {
                     $url = $modules[$_POST['checkxml_id']]['repository'];
@@ -146,15 +146,18 @@ class tweakStoresBehaviors
         $core->formNonce() . '</p>' .
         '</form>';
 
-        if (!empty($file_content)) {
+        if (!empty($url)) {
             echo
             '<div class="fieldset">' .
             '<h4>' . __('Repositiory contents') . '</h4>' .
-            '<pre>' . form::textArea('file_xml', 165, 14, [
-                'default'    => html::escapeHTML(str_replace('><', ">\n<", $file_content)),
-                'class'      => 'maximal',
-                'extra_html' => 'readonly="true"'
-            ]) . '</pre>' .
+            '<p>' . $url . '</p>' .
+            (empty($file_content) ? '' :
+                '<pre>' . form::textArea('file_xml', 165, 14, [
+                    'default'    => html::escapeHTML(str_replace('><', ">\n<", $file_content)),
+                    'class'      => 'maximal',
+                    'extra_html' => 'readonly="true"'
+                ]) . '</pre>'
+            ) .
             '</div>';
         }
 
