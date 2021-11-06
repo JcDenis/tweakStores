@@ -1,6 +1,10 @@
 dev
 - [ ] add update from external repositories
 
+0.4 - 2021.11.06
+- add colored synthax for xml content
+- display checked url on ui
+
 0.3.1 - 2021.11.05
 - fix permissions
 - add copy to clipboard button
