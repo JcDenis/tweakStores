@@ -182,7 +182,7 @@ class tweakStores
         $res = new xmlTag('modules', $rsp);
         $res->insertAttr('xmlns:da', 'http://dotaddict.org/da/');
 
-        return $res->toXML();
+        return self::prettyXML($res->toXML());
     }
 
     public static function writeXML($id, $module, $file_pattern)
@@ -197,7 +197,7 @@ class tweakStores
         }
 
         try {
-            files::putContent($module['root'] . '/dcstore.xml', str_replace('><', ">\n<", $content));
+            files::putContent($module['root'] . '/dcstore.xml', $content);
         } catch (Exception $e) {
             self::$failed[] = $e->getMessage();
 
@@ -205,5 +205,19 @@ class tweakStores
         }
 
         return true;
+    }
+
+    public static function prettyXML(string $str): string
+    {
+        if (class_exists('DOMDocument')) {
+            $dom                     = new DOMDocument('1.0');
+            $dom->preserveWhiteSpace = false;
+            $dom->formatOutput       = true;
+            $dom->loadXML($str);
+
+            return $dom->saveXML();
+        }
+
+        return str_replace('><', ">\n<", $str);
     }
 }

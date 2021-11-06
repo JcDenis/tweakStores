@@ -45,9 +45,16 @@ class tweakStoresBehaviors
     # addd some js
     public static function modulesToolsHeaders(dcCore $core, $plugin)
     {
+        $core->auth->user_prefs->addWorkspace('interface');
+
         return
             dcPage::jsVars(['dotclear.ts_copied' => __('Copied to clipboard')]) .
-            dcPage::jsLoad(dcPage::getPF('tweakStores/js/admin.js'));
+            dcPage::jsLoad(dcPage::getPF('tweakStores/js/admin.js')) .
+            (
+                !$core->auth->user_prefs->interface->colorsyntax ? '' :
+                dcPage::jsLoadCodeMirror($core->auth->user_prefs->interface->colorsyntax_theme) .
+                dcPage::jsLoad(dcPage::getPF('tweakStores/js/cms.js'))
+            );
     }
 
     # admin plugins page tab
@@ -65,10 +72,11 @@ class tweakStoresBehaviors
     # generic page tab
     protected static function modulesToolsTabs(dcCore $core, $modules, $excludes, $page_url)
     {
-        $combo = self::comboModules($modules, $excludes);
-
-        # zip file url pattern
-        $file_pattern = $core->blog->settings->tweakStores->file_pattern;
+        $core->auth->user_prefs->addWorkspace('interface');
+        $user_ui_colorsyntax       = $core->auth->user_prefs->interface->colorsyntax;
+        $user_ui_colorsyntax_theme = $core->auth->user_prefs->interface->colorsyntax_theme;
+        $combo                     = self::comboModules($modules, $excludes);
+        $file_pattern              = $core->blog->settings->tweakStores->file_pattern;
 
         # check dcstore repo
         $url = '';
@@ -154,10 +162,14 @@ class tweakStoresBehaviors
             (
                 empty($file_content) ? '' :
                 '<pre>' . form::textArea('file_xml', 165, 14, [
-                    'default'    => html::escapeHTML(str_replace('><', ">\n<", $file_content)),
+                    'default'    => html::escapeHTML(tweakStores::prettyXML($file_content)),
                     'class'      => 'maximal',
                     'extra_html' => 'readonly="true"'
-                ]) . '</pre>'
+                ]) . '</pre>' .
+                (
+                    !$user_ui_colorsyntax ? '' :
+                    dcPage::jsRunCodeMirror('editor', 'file_xml', 'dotclear', $user_ui_colorsyntax_theme)
+                )
             ) .
             '</div>';
         }
@@ -197,10 +209,14 @@ class tweakStoresBehaviors
                 }
                 echo
                 '<pre>' . form::textArea('gen_xml', 165, 14, [
-                    'default'    => html::escapeHTML(str_replace('><', ">\n<", $xml_content)),
+                    'default'    => html::escapeHTML(tweakStores::prettyXML($xml_content)),
                     'class'      => 'maximal',
                     'extra_html' => 'readonly="true"'
-                ]) . '</pre>';
+                ]) . '</pre>' .
+                (
+                    !$user_ui_colorsyntax ? '' :
+                    dcPage::jsRunCodeMirror('editor', 'gen_xml', 'dotclear', $user_ui_colorsyntax_theme)
+                );
 
                 if (empty(tweakStores::$failed)
                     && $modules[$_POST['buildxml_id']]['root_writable']
