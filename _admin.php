@@ -151,7 +151,8 @@ class tweakStoresBehaviors
             '<div class="fieldset">' .
             '<h4>' . __('Repositiory contents') . '</h4>' .
             '<p>' . $url . '</p>' .
-            (empty($file_content) ? '' :
+            (
+                empty($file_content) ? '' :
                 '<pre>' . form::textArea('file_xml', 165, 14, [
                     'default'    => html::escapeHTML(str_replace('><', ">\n<", $file_content)),
                     'class'      => 'maximal',
