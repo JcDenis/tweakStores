@@ -12,11 +12,14 @@
  */
 class tweakStores
 {
+    /** @var array List of notice messages */
     public static $notice = [];
+
+    /** @var array List of failed messages */
     public static $failed = [];
 
     # taken from lib.moduleslist.php
-    public static function sanitizeModule($id, $module)
+    public static function sanitizeModule(string $id, array $module): array
     {
         $label = empty($module['label']) ? $id : $module['label'];
         $name  = __(empty($module['name']) ? $label : $module['name']);
@@ -62,12 +65,12 @@ class tweakStores
     }
 
     # taken from lib.moduleslist.php
-    public static function sanitizeString($str)
+    public static function sanitizeString(string $str): string
     {
-        return preg_replace('/[^A-Za-z0-9\@\#+_-]/', '', strtolower($str));
+        return (string) preg_replace('/[^A-Za-z0-9\@\#+_-]/', '', strtolower($str));
     }
 
-    public static function parseFilePattern($id, $module, $file_pattern)
+    public static function parseFilePattern(string $id, array $module, string $file_pattern): string
     {
         $module = self::sanitizeModule($id, $module);
 
@@ -88,10 +91,10 @@ class tweakStores
         ));
     }
 
-    public static function generateXML($id, $module, $file_pattern)
+    public static function generateXML(string $id, array $module, string $file_pattern): string
     {
         if (!is_array($module) || empty($module)) {
-            return false;
+            return '';
         }
         $module = self::sanitizeModule($id, $module);
         $rsp    = new xmlTag('module');
@@ -185,7 +188,7 @@ class tweakStores
         return self::prettyXML($res->toXML());
     }
 
-    public static function writeXML($id, $module, $file_pattern)
+    public static function writeXML(string $id, array $module, string $file_pattern): bool
     {
         self::$failed = [];
         if (!$module['root_writable']) {
@@ -215,9 +218,9 @@ class tweakStores
             $dom->formatOutput       = true;
             $dom->loadXML($str);
 
-            return $dom->saveXML();
+            return (string) $dom->saveXML();
         }
 
-        return str_replace('><', ">\n<", $str);
+        return (string) str_replace('><', ">\n<", $str);
     }
 }

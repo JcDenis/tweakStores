@@ -37,13 +37,13 @@ $core->addBehavior('themesToolsTabs', ['tweakStoresBehaviors', 'themesToolsTabs'
 class tweakStoresBehaviors
 {
     # create dcstore.xml file on the fly when pack a module
-    public static function packmanBeforeCreatePackage(dcCore $core, $module)
+    public static function packmanBeforeCreatePackage(dcCore $core, array $module): void
     {
         tweakStores::writeXML($module['id'], $module, $core->blog->settings->tweakStores->file_pattern);
     }
 
     # addd some js
-    public static function modulesToolsHeaders(dcCore $core, $plugin)
+    public static function modulesToolsHeaders(dcCore $core, bool $is_plugin): string
     {
         $core->auth->user_prefs->addWorkspace('interface');
 
@@ -58,19 +58,19 @@ class tweakStoresBehaviors
     }
 
     # admin plugins page tab
-    public static function pluginsToolsTabs(dcCore $core)
+    public static function pluginsToolsTabs(dcCore $core): void
     {
         self::modulesToolsTabs($core, $core->plugins->getModules(), explode(',', DC_DISTRIB_PLUGINS), $core->adminurl->get('admin.plugins') . '#tweakStores');
     }
 
     # admin themes page tab
-    public static function themesToolsTabs(dcCore $core)
+    public static function themesToolsTabs(dcCore $core): void
     {
         self::modulesToolsTabs($core, $core->themes->getModules(), explode(',', DC_DISTRIB_THEMES), $core->adminurl->get('admin.blog.theme') . '#tweakStores');
     }
 
     # generic page tab
-    protected static function modulesToolsTabs(dcCore $core, $modules, $excludes, $page_url)
+    protected static function modulesToolsTabs(dcCore $core, array $modules, array $excludes, string $page_url): void
     {
         $core->auth->user_prefs->addWorkspace('interface');
         $user_ui_colorsyntax       = $core->auth->user_prefs->interface->colorsyntax;
@@ -252,7 +252,7 @@ class tweakStoresBehaviors
     }
 
     # create list of module for combo and remove official modules
-    protected static function comboModules($modules, array $excludes)
+    protected static function comboModules(array $modules, array $excludes): array
     {
         $combo = [__('Select a module') => '0'];
         foreach ($modules as $id => $module) {
