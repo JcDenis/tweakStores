@@ -48,7 +48,7 @@ class tweakStores
                 'requires'          => [],
                 'settings'          => [],
                 'repository'        => '',
-                'dc_min'            => 0
+                'dc_min'            => 0,
             ],
             # Module's values
             $module,
@@ -59,7 +59,7 @@ class tweakStores
                 'label' => $label,
                 'name'  => $name,
                 'oname' => $oname,
-                'sname' => self::sanitizeString($name)
+                'sname' => self::sanitizeString($name),
             ]
         );
     }
@@ -79,13 +79,13 @@ class tweakStores
                 '%type%',
                 '%id%',
                 '%version%',
-                '%author%'
+                '%author%',
             ],
             [
                 $module['type'],
                 $module['id'],
                 $module['version'],
-                $module['author']
+                $module['author'],
             ],
             $file_pattern
         ));

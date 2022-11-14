@@ -17,11 +17,11 @@ if (!defined('DC_CONTEXT_MODULE')) {
 dcPage::checkSuper();
 
 $redir = empty($_REQUEST['redir']) ?
-    $list->getURL() . '#plugins' : $_REQUEST['redir'];
+    dcCore::app()->admin->list->getURL() . '#plugins' : $_REQUEST['redir'];
 
 # -- Get settings --
-$core->blog->settings->addNamespace('tweakStores');
-$s = $core->blog->settings->tweakStores;
+dcCore::app()->blog->settings->addNamespace('tweakStores');
+$s = dcCore::app()->blog->settings->tweakStores;
 
 $tweakStores_active       = $s->active;
 $tweakStores_packman      = $s->packman;
@@ -42,10 +42,10 @@ if (!empty($_POST['save'])) {
             __('Configuration successfully updated')
         );
         http::redirect(
-            $list->getURL('module=tweakStores&conf=1&redir=' . $list->getRedir())
+            dcCore::app()->admin->list->getURL('module=tweakStores&conf=1&redir=' . dcCore::app()->admin->list->getRedir())
         );
     } catch (Exception $e) {
-        $core->error->add($e->getMessage());
+        dcCore::app()->error->add($e->getMessage());
     }
 }
 

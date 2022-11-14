@@ -15,68 +15,68 @@ if (!defined('DC_CONTEXT_ADMIN')) {
 }
 
 # only superadmin
-if (!$core->auth->isSuperAdmin()) {
+if (!dcCore::app()->auth->isSuperAdmin()) {
     return null;
 }
 
 # only if activated
-$core->blog->settings->addNamespace('tweakStores');
-if (!$core->blog->settings->tweakStores->active) {
+dcCore::app()->blog->settings->addNamespace('tweakStores');
+if (!dcCore::app()->blog->settings->tweakStores->active) {
     return null;
 }
 
 # admin behaviors
-if ($core->blog->settings->tweakStores->packman) {
-    $core->addBehavior('packmanBeforeCreatePackage', ['tweakStoresBehaviors', 'packmanBeforeCreatePackage']);
+if (dcCore::app()->blog->settings->tweakStores->packman) {
+    dcCore::app()->addBehavior('packmanBeforeCreatePackage', ['tweakStoresBehaviors', 'packmanBeforeCreatePackage']);
 }
-$core->addBehavior('pluginsToolsHeaders', ['tweakStoresBehaviors', 'modulesToolsHeaders']);
-$core->addBehavior('themesToolsHeaders', ['tweakStoresBehaviors', 'modulesToolsHeaders']);
-$core->addBehavior('pluginsToolsTabs', ['tweakStoresBehaviors', 'pluginsToolsTabs']);
-$core->addBehavior('themesToolsTabs', ['tweakStoresBehaviors', 'themesToolsTabs']);
+dcCore::app()->addBehavior('pluginsToolsHeadersV2', ['tweakStoresBehaviors', 'modulesToolsHeaders']);
+dcCore::app()->addBehavior('themesToolsHeadersV2', ['tweakStoresBehaviors', 'modulesToolsHeaders']);
+dcCore::app()->addBehavior('pluginsToolsTabsV2', ['tweakStoresBehaviors', 'pluginsToolsTabs']);
+dcCore::app()->addBehavior('themesToolsTabsV2', ['tweakStoresBehaviors', 'themesToolsTabs']);
 
 class tweakStoresBehaviors
 {
     # create dcstore.xml file on the fly when pack a module
-    public static function packmanBeforeCreatePackage(dcCore $core, array $module): void
+    public static function packmanBeforeCreatePackage(array $module): void
     {
-        tweakStores::writeXML($module['id'], $module, $core->blog->settings->tweakStores->file_pattern);
+        tweakStores::writeXML($module['id'], $module, dcCore::app()->blog->settings->tweakStores->file_pattern);
     }
 
     # addd some js
-    public static function modulesToolsHeaders(dcCore $core, bool $is_plugin): string
+    public static function modulesToolsHeaders(bool $is_plugin): string
     {
-        $core->auth->user_prefs->addWorkspace('interface');
+        dcCore::app()->auth->user_prefs->addWorkspace('interface');
 
         return
             dcPage::jsVars(['dotclear.ts_copied' => __('Copied to clipboard')]) .
             dcPage::jsLoad(dcPage::getPF('tweakStores/js/admin.js')) .
             (
-                !$core->auth->user_prefs->interface->colorsyntax ? '' :
-                dcPage::jsLoadCodeMirror($core->auth->user_prefs->interface->colorsyntax_theme) .
+                !dcCore::app()->auth->user_prefs->interface->colorsyntax ? '' :
+                dcPage::jsLoadCodeMirror(dcCore::app()->auth->user_prefs->interface->colorsyntax_theme) .
                 dcPage::jsLoad(dcPage::getPF('tweakStores/js/cms.js'))
             );
     }
 
     # admin plugins page tab
-    public static function pluginsToolsTabs(dcCore $core): void
+    public static function pluginsToolsTabs(): void
     {
-        self::modulesToolsTabs($core, $core->plugins->getModules(), explode(',', DC_DISTRIB_PLUGINS), $core->adminurl->get('admin.plugins') . '#tweakStores');
+        self::modulesToolsTabs(dcCore::app()->plugins->getModules(), explode(',', DC_DISTRIB_PLUGINS), dcCore::app()->adminurl->get('admin.plugins') . '#tweakStores');
     }
 
     # admin themes page tab
-    public static function themesToolsTabs(dcCore $core): void
+    public static function themesToolsTabs(): void
     {
-        self::modulesToolsTabs($core, $core->themes->getModules(), explode(',', DC_DISTRIB_THEMES), $core->adminurl->get('admin.blog.theme') . '#tweakStores');
+        self::modulesToolsTabs(dcCore::app()->themes->getModules(), explode(',', DC_DISTRIB_THEMES), dcCore::app()->adminurl->get('admin.blog.theme') . '#tweakStores');
     }
 
     # generic page tab
-    protected static function modulesToolsTabs(dcCore $core, array $modules, array $excludes, string $page_url): void
+    protected static function modulesToolsTabs(array $modules, array $excludes, string $page_url): void
     {
-        $core->auth->user_prefs->addWorkspace('interface');
-        $user_ui_colorsyntax       = $core->auth->user_prefs->interface->colorsyntax;
-        $user_ui_colorsyntax_theme = $core->auth->user_prefs->interface->colorsyntax_theme;
+        dcCore::app()->auth->user_prefs->addWorkspace('interface');
+        $user_ui_colorsyntax       = dcCore::app()->auth->user_prefs->interface->colorsyntax;
+        $user_ui_colorsyntax_theme = dcCore::app()->auth->user_prefs->interface->colorsyntax_theme;
         $combo                     = self::comboModules($modules, $excludes);
-        $file_pattern              = $core->blog->settings->tweakStores->file_pattern;
+        $file_pattern              = dcCore::app()->blog->settings->tweakStores->file_pattern;
 
         # check dcstore repo
         $url = '';
@@ -115,12 +115,12 @@ class tweakStoresBehaviors
 
         # write dcstore.xml file
         if (!empty($_POST['write_xml'])) {
-            if (empty($_POST['your_pwd']) || !$core->auth->checkPassword($_POST['your_pwd'])) {
-                $core->error->add(__('Password verification failed'));
+            if (empty($_POST['your_pwd']) || !dcCore::app()->auth->checkPassword($_POST['your_pwd'])) {
+                dcCore::app()->error->add(__('Password verification failed'));
             } else {
                 $ret = tweakStores::writeXML($_POST['buildxml_id'], $modules[$_POST['buildxml_id']], $file_pattern);
                 if (!empty(tweakStores::$failed)) {
-                    $core->error->add(implode(' ', tweakStores::$failed));
+                    dcCore::app()->error->add(implode(' ', tweakStores::$failed));
                 }
             }
         }
@@ -129,8 +129,8 @@ class tweakStoresBehaviors
         '<h3>' . __('Tweak third-party repositories') . '</h3>';
 
         if (!empty($_POST['write_xml'])) {
-            if ($core->error->flag()) {
-                echo '<p class="error">' . implode(' ', $core->error->getErrors()) . '</p>';
+            if (dcCore::app()->error->flag()) {
+                echo dcCore::app()->error->toHTML();
             } else {
                 echo '<p class="success">' . __('File successfully written') . '</p>';
             }
@@ -151,7 +151,7 @@ class tweakStoresBehaviors
         form::combo('checkxml_id', $combo, empty($_POST['checkxml_id']) ? '-' : html::escapeHTML($_POST['checkxml_id'])) .
         '</p>' .
         '<p><input type="submit" name="check_xml" value="' . __('Check') . '" />' .
-        $core->formNonce() . '</p>' .
+        dcCore::app()->formNonce() . '</p>' .
         '</form>';
 
         if (!empty($url)) {
@@ -164,7 +164,7 @@ class tweakStoresBehaviors
                 '<pre>' . form::textArea('file_xml', 165, 14, [
                     'default'    => html::escapeHTML(tweakStores::prettyXML($file_content)),
                     'class'      => 'maximal',
-                    'extra_html' => 'readonly="true"'
+                    'extra_html' => 'readonly="true"',
                 ]) . '</pre>' .
                 (
                     !$user_ui_colorsyntax ? '' :
@@ -177,7 +177,7 @@ class tweakStoresBehaviors
         if (empty($file_pattern)) {
             echo sprintf(
                 '<div class="fieldset"><h4>' . __('Generate xml code') . '</h4><p class="info"><a href="%s">%s</a></p></div>',
-                $core->adminurl->get('admin.plugins', ['module' => 'tweakStores', 'conf' => 1, 'redir' => $page_url]),
+                dcCore::app()->adminurl->get('admin.plugins', ['module' => 'tweakStores', 'conf' => 1, 'redir' => $page_url]),
                 __('You must configure zip file pattern to complete xml code automatically.')
             );
         } else {
@@ -189,7 +189,7 @@ class tweakStoresBehaviors
             form::combo('buildxml_id', $combo, empty($_POST['buildxml_id']) ? '-' : html::escapeHTML($_POST['buildxml_id'])) .
             '</p>' .
             '<p><input type="submit" name="build_xml" value="' . __('Generate') . '" />' .
-            $core->formNonce() . '</p>' .
+            dcCore::app()->formNonce() . '</p>' .
             '</form>';
         }
         if (!empty($_POST['buildxml_id'])) {
@@ -211,7 +211,7 @@ class tweakStoresBehaviors
                 '<pre>' . form::textArea('gen_xml', 165, 14, [
                     'default'    => html::escapeHTML(tweakStores::prettyXML($xml_content)),
                     'class'      => 'maximal',
-                    'extra_html' => 'readonly="true"'
+                    'extra_html' => 'readonly="true"',
                 ]) . '</pre>' .
                 (
                     !$user_ui_colorsyntax ? '' :
@@ -220,7 +220,7 @@ class tweakStoresBehaviors
 
                 if (empty(tweakStores::$failed)
                     && $modules[$_POST['buildxml_id']]['root_writable']
-                    && $core->auth->isSuperAdmin()
+                    && dcCore::app()->auth->isSuperAdmin()
                 ) {
                     echo
                     '<p class="field"><label for="your_pwd2" class="classic required"><abbr title="' . __('Required field') . '">*</abbr> ' . __('Your password:') . '</label> ' .
@@ -230,17 +230,17 @@ class tweakStoresBehaviors
                         255,
                         [
                             'extra_html'   => 'required placeholder="' . __('Password') . '"',
-                            'autocomplete' => 'current-password'
+                            'autocomplete' => 'current-password',
                         ]
                     ) . '</p>' .
                     '<p><input type="submit" name="write_xml" value="' . __('Save to module directory') . '" /> ' .
                     '<a class="hidden-if-no-js button" href="#tweakStores" id="ts_copy_button">' . __('Copy to clipboard') . '</a>' .
                     form::hidden('buildxml_id', $_POST['buildxml_id']) .
-                    $core->formNonce() . '</p>';
+                    dcCore::app()->formNonce() . '</p>';
                 }
                 echo sprintf(
                     '<p class="info"><a href="%s">%s</a></p>',
-                    $core->adminurl->get('admin.plugins', ['module' => 'tweakStores', 'conf' => 1, 'redir' => $page_url]),
+                    dcCore::app()->adminurl->get('admin.plugins', ['module' => 'tweakStores', 'conf' => 1, 'redir' => $page_url]),
                     __('You can edit zip file pattern from configuration page.')
                 );
             }

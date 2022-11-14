@@ -14,4 +14,4 @@ if (!defined('DC_RC_PATH')) {
     return null;
 }
 
-$__autoload['tweakStores'] = dirname(__FILE__) . '/inc/class.tweakstores.php';
+Clearbricks::lib()->autoload(['tweakStores' => __DIR__ . '/inc/class.tweakstores.php']);
