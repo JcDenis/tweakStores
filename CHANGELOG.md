@@ -1,6 +1,9 @@
 dev
 - [ ] add update from external repositories
 
+0.5 - 2022.11.20
+- fix compatibility with Dotclear 2.24 (required)
+
 0.4 - 2021.11.06
 - add colored synthax for xml content
 - display checked url on ui
