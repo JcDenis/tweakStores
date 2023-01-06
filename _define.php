@@ -18,13 +18,13 @@ $this->registerModule(
     'Tweak stores',
     'Helper to manage external repositories',
     'Jean-Christian Denis and Contributors',
-    '0.5',
+    '0.6',
     [
         'requires'    => [['core', '2.24']],
         'permissions' => null,
         'type'        => 'plugin',
-        'support'     => 'https://github.com/JcDenis/tweakStores',
-        'details'     => 'https://plugins.dotaddict.org/dc2/details/tweakStores',
-        'repository'  => 'https://raw.githubusercontent.com/JcDenis/tweakStores/master/',
+        'support'     => 'https://github.com/JcDenis/' . basename(__DIR__),
+        'details'     => 'https://plugins.dotaddict.org/dc2/details/' . basename(__DIR__),
+        'repository'  => 'https://raw.githubusercontent.com/JcDenis/' . basename(__DIR__) . '/master/',
     ]
 );

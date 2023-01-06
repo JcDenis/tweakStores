@@ -1,6 +1,11 @@
 dev
 - [ ] add update from external repositories
 
+0.6 - 2023.01.06
+- use namespace
+- use abstract plugin id
+- fix deprecated dotclear usage
+
 0.5 - 2022.11.20
 - fix compatibility with Dotclear 2.24 (required)
 

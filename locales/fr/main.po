@@ -1,9 +1,9 @@
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
-"Project-Id-Version: tweakStores 0.3.1\n"
+"Project-Id-Version: tweakStores 0.5\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2021-11-05T00:12:32+00:00\n"
+"PO-Revision-Date: 2023-01-06T08:29:42+00:00\n"
 "Last-Translator: Jean-Christian Denis\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -79,6 +79,9 @@ msgstr "Vous pouvez modifier le modèle de fichier zip sur la page de configurat
 msgid "Select a module"
 msgstr "Sélectionner un module"
 
+msgid "Enable plugin"
+msgstr "Activer le plugin"
+
 msgid "If enabled, new tab \"Tweak stores\" allows your to perfom actions relative to third-party repositories."
 msgstr "Si activé, un nouvel onglet \"Tweak stores\" vous permettra de mener des actions relatives aux dépôts tiers."
 
@@ -99,4 +102,10 @@ msgstr "Par exemple sur github https://github.com/MyGitName/%id%/releases/downlo
 
 msgid "Note: on github, you must create a release and join to it the module zip file."
 msgstr "Note : sur github, vous devez créer un release et y joindre le fichier zip du module."
+
+msgid "Helper to manage external repositories"
+msgstr "Aide à la gestion de dépôts externes"
+
+msgid "Tweak stores"
+msgstr "Tweak stores"
 
