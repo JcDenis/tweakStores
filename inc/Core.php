@@ -10,7 +10,20 @@
  * @copyright Jean-Christian Denis
  * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
  */
-class tweakStores
+declare(strict_types=1);
+
+namespace Dotclear\Plugin\tweakStores;
+
+/* clearbricks ns */
+use files;
+use text;
+use xmlTag;
+
+/* php ns */
+use DOMDocument;
+use Exception;
+
+class Core
 {
     /** @var array List of notice messages */
     public static $notice = [];

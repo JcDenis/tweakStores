@@ -1,6 +1,8 @@
 /*global $, dotclear */
 'use strict';
 
+Object.assign(dotclear.msg, dotclear.getData('ts_copied'));
+
 $(function(){
   $("#ts_copy_button").click(function() {
     var style = $("#gen_xml").attr('style');
@@ -14,7 +16,7 @@ $(function(){
     $("#gen_xml").removeAttr("contenteditable").attr('style', style);
     $("#ts_copy_button").focus();
 
-     alert(dotclear.ts_copied);
+     alert(dotclear.msg.alert);
     return false;
   });
 });
