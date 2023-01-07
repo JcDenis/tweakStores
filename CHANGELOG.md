@@ -1,6 +1,9 @@
 dev
 - [ ] add update from external repositories
 
+0.6.1 - 2023.01.07
+- fix previously introduced unix bug
+
 0.6 - 2023.01.06
 - use namespace
 - use abstract plugin id
