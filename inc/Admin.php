@@ -27,6 +27,7 @@ use Exception;
 
 class Admin
 {
+    private static $pid    = '';
     protected static $init = false;
 
     public static function init(): bool
@@ -36,6 +37,7 @@ class Admin
          && dcCore::app()->blog->settings->get(basename(__NAMESPACE__))->get('active')
         ) {
             dcCore::app()->auth->user_prefs->addWorkspace('interface');
+            self::$pid  = basename(dirname(__DIR__));
             self::$init = true;
         }
 
@@ -48,10 +50,10 @@ class Admin
             return false;
         }
 
-        if (dcCore::app()->blog->settings->get(basename(__NAMESPACE__))->get('packman')) {
+        if (dcCore::app()->blog->settings->get(self::$pid)->get('packman')) {
             // create dcstore.xml file on the fly when plugin packman pack a module
             dcCore::app()->addBehavior('packmanBeforeCreatePackage', function (array $module): void {
-                Core::writeXML($module['id'], $module, dcCore::app()->blog->settings->get(basename(__NAMESPACE__))->get('file_pattern'));
+                Core::writeXML($module['id'], $module, dcCore::app()->blog->settings->get(self::$pid)->get('file_pattern'));
             });
         }
 
@@ -76,21 +78,21 @@ class Admin
     {
         return
             dcPage::jsJson('ts_copied', ['alert' => __('Copied to clipboard')]) .
-            dcPage::jsModuleLoad(basename(__NAMESPACE__) . '/js/admin.js') .
+            dcPage::jsModuleLoad(self::$pid . '/js/admin.js') .
             (
                 !dcCore::app()->auth->user_prefs->interface->colorsyntax ? '' :
                 dcPage::jsLoadCodeMirror(dcCore::app()->auth->user_prefs->interface->colorsyntax_theme) .
-                dcPage::jsModuleLoad(basename(__NAMESPACE__) . '/js/cms.js')
+                dcPage::jsModuleLoad(self::$pid . '/js/cms.js')
             );
     }
 
     protected static function modulesToolsTabs(array $modules, array $excludes, string $page_url): void
     {
-        $page_url .= '#' . basename(__NAMESPACE__);
+        $page_url .= '#' . self::$pid;
         $user_ui_colorsyntax       = dcCore::app()->auth->user_prefs->interface->colorsyntax;
         $user_ui_colorsyntax_theme = dcCore::app()->auth->user_prefs->interface->colorsyntax_theme;
         $combo                     = self::comboModules($modules, $excludes);
-        $file_pattern              = dcCore::app()->blog->settings->get(basename(__NAMESPACE__))->get('file_pattern');
+        $file_pattern              = dcCore::app()->blog->settings->get(self::$pid)->get('file_pattern');
 
         # check dcstore repo
         $url = '';
@@ -139,7 +141,7 @@ class Admin
             }
         }
         echo
-        '<div class="multi-part" id="' . basename(__NAMESPACE__) . '" title="' . dcCore::app()->plugins->moduleInfo(basename(__NAMESPACE__), 'name') . '">' .
+        '<div class="multi-part" id="' . self::$pid . '" title="' . dcCore::app()->plugins->moduleInfo(self::$pid, 'name') . '">' .
         '<h3>' . __('Tweak third-party repositories') . '</h3>';
 
         if (!empty($_POST['write_xml'])) {
@@ -191,7 +193,7 @@ class Admin
         if (empty($file_pattern)) {
             echo sprintf(
                 '<div class="fieldset"><h4>' . __('Generate xml code') . '</h4><p class="info"><a href="%s">%s</a></p></div>',
-                dcCore::app()->adminurl->get('admin.plugins', ['module' => basename(__NAMESPACE__), 'conf' => 1, 'redir' => $page_url]),
+                dcCore::app()->adminurl->get('admin.plugins', ['module' => self::$pid, 'conf' => 1, 'redir' => $page_url]),
                 __('You must configure zip file pattern to complete xml code automatically.')
             );
         } else {
@@ -248,13 +250,13 @@ class Admin
                         ]
                     ) . '</p>' .
                     '<p><input type="submit" name="write_xml" value="' . __('Save to module directory') . '" /> ' .
-                    '<a class="hidden-if-no-js button" href="#' . basename(__NAMESPACE__) . '" id="ts_copy_button">' . __('Copy to clipboard') . '</a>' .
+                    '<a class="hidden-if-no-js button" href="#' . self::$pid . '" id="ts_copy_button">' . __('Copy to clipboard') . '</a>' .
                     form::hidden('buildxml_id', $_POST['buildxml_id']) .
                     dcCore::app()->formNonce() . '</p>';
                 }
                 echo sprintf(
                     '<p class="info"><a href="%s">%s</a></p>',
-                    dcCore::app()->adminurl->get('admin.plugins', ['module' => basename(__NAMESPACE__), 'conf' => 1, 'redir' => $page_url]),
+                    dcCore::app()->adminurl->get('admin.plugins', ['module' => self::$pid, 'conf' => 1, 'redir' => $page_url]),
                     __('You can edit zip file pattern from configuration page.')
                 );
             }

@@ -41,7 +41,7 @@ class Prepend
 
         foreach (self::LIBS as $lib) {
             Clearbricks::lib()->autoload([
-                implode('\\', ['Dotclear','Plugin', basename(__NAMESPACE__), $lib]) => __DIR__ . DIRECTORY_SEPARATOR . $lib . '.php',
+                __NAMESPACE__ . '\\' . $lib => __DIR__ . DIRECTORY_SEPARATOR . $lib . '.php',
             ]);
         }
 

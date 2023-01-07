@@ -27,12 +27,14 @@ use Exception;
 
 class Config
 {
+    private static $pid    = '';
     protected static $init = false;
 
     public static function init(): bool
     {
         if (defined('DC_CONTEXT_ADMIN') && defined('DC_CONTEXT_MODULE')) {
             dcPage::checkSuper();
+            self::$pid  = basename(dirname(__DIR__));
             self::$init = true;
         }
 
@@ -50,7 +52,7 @@ class Config
         }
 
         try {
-            $s = dcCore::app()->blog->settings->get(basename(__NAMESPACE__));
+            $s = dcCore::app()->blog->settings->get(self::$pid);
             $s->put('active', !empty($_POST['s_active']));
             $s->put('packman', !empty($_POST['s_packman']));
             $s->put('file_pattern', $_POST['s_file_pattern']);
@@ -59,7 +61,7 @@ class Config
                 __('Configuration successfully updated')
             );
             http::redirect(
-                dcCore::app()->admin->__get('list')->getURL('module=' . basename(__NAMESPACE__) . '&conf=1&redir=' . dcCore::app()->admin->__get('list')->getRedir())
+                dcCore::app()->admin->__get('list')->getURL('module=' . self::$pid . '&conf=1&redir=' . dcCore::app()->admin->__get('list')->getRedir())
             );
 
             return true;
@@ -72,11 +74,11 @@ class Config
 
     public static function render(): void
     {
-        $s = dcCore::app()->blog->settings->get(basename(__NAMESPACE__));
+        $s = dcCore::app()->blog->settings->get(self::$pid);
 
         echo '
         <div class="fieldset">
-        <h4>' . dcCore::app()->plugins->moduleInfo(basename(__NAMESPACE__), 'name') . '</h4>
+        <h4>' . dcCore::app()->plugins->moduleInfo(self::$pid, 'name') . '</h4>
 
         <p><label class="classic" for="s_active">' .
         form::checkbox('s_active', 1, (bool) $s->get('active')) . ' ' .
