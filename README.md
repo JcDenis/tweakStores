@@ -19,7 +19,8 @@ It helps devs to manage dcstore.xml file.
  _tweakStores_ requires: 
 
   * superadmin permissions
-  * Dotclear 2.24 
+  * Dotclear 2.26
+  * PHP >= 8.1
 
 ## USAGE
 
