@@ -16,89 +16,98 @@ namespace Dotclear\Plugin\tweakStores;
 
 /* dotclear ns */
 use dcCore;
+use dcNsProcess;
 use dcPage;
-
-/* clearbricks ns */
-use form;
-use http;
+use Dotclear\Helper\Html\Form\{
+    Checkbox,
+    Div,
+    Fieldset,
+    Input,
+    Label,
+    Legend,
+    Note,
+    Para
+};
 
 /* php ns */
 use Exception;
 
-class Config
+class Config extends dcNsProcess
 {
-    private static $pid    = '';
-    protected static $init = false;
-
     public static function init(): bool
     {
-        if (defined('DC_CONTEXT_ADMIN') && defined('DC_CONTEXT_MODULE')) {
-            dcPage::checkSuper();
-            self::$pid  = basename(dirname(__DIR__));
-            self::$init = true;
-        }
+        static::$init = My::phpCompliant()
+            && defined('DC_CONTEXT_ADMIN')
+            && defined('DC_CONTEXT_MODULE')
+            && dcCore::app()->auth->isSuperAdmin();
 
-        return self::$init;
+        return static::$init;
     }
 
-    public static function process(): ?bool
+    public static function process(): bool
     {
-        if (!self::$init) {
+        if (!static::$init) {
             return false;
         }
 
         if (empty($_POST['save'])) {
-            return null;
+            return true;
         }
 
+        $s = new Settings();
+
         try {
-            $s = dcCore::app()->blog->settings->get(self::$pid);
-            $s->put('active', !empty($_POST['s_active']));
-            $s->put('packman', !empty($_POST['s_packman']));
-            $s->put('file_pattern', $_POST['s_file_pattern']);
+            foreach ($s->listSettings() as $key) {
+                $s->writeSetting($key, $_POST['ts_' . $key] ?? '');
+            }
 
             dcPage::addSuccessNotice(
                 __('Configuration successfully updated')
             );
-            http::redirect(
-                dcCore::app()->admin->__get('list')->getURL('module=' . self::$pid . '&conf=1&redir=' . dcCore::app()->admin->__get('list')->getRedir())
+            dcCore::app()->adminurl->redirect(
+                'admin.plugins',
+                ['module' => My::id(), 'conf' => 1, 'redir' => dcCore::app()->admin->__get('list')->getRedir()]
             );
-
-            return true;
         } catch (Exception $e) {
             dcCore::app()->error->add($e->getMessage());
         }
 
-        return null;
+        return true;
     }
 
     public static function render(): void
     {
-        $s = dcCore::app()->blog->settings->get(self::$pid);
+        if (!static::$init) {
+            return;
+        }
 
-        echo '
-        <div class="fieldset">
-        <h4>' . dcCore::app()->plugins->moduleInfo(self::$pid, 'name') . '</h4>
+        $s = new Settings();
 
-        <p><label class="classic" for="s_active">' .
-        form::checkbox('s_active', 1, (bool) $s->get('active')) . ' ' .
-        __('Enable plugin') . '</label></p>
-        <p class="form-note">' . __('If enabled, new tab "Tweak stores" allows your to perfom actions relative to third-party repositories.') . '</p>
-
-        <p><label class="classic" for="s_packman">' .
-        form::checkbox('s_packman', 1, (bool) $s->get('packman')) . ' ' .
-        __('Enable packman behaviors') . '</label></p>
-        <p class="form-note">' . __('If enabled, plugin pacKman will (re)generate on the fly dcstore.xml file at root directory of the module.') . '</p>
-
-        <p><label class="classic" for="s_file_pattern">' . __('Predictable URL to zip file on the external repository') .
-        form::field('s_file_pattern', 65, 255, (string) $s->get('file_pattern'), 'maximal') . ' 
-        </label></p>
-        <p class="form-note">' .
-        __('You can use widcard like %author%, %type%, %id%, %version%.') . '<br /> ' .
-        __('For example on github https://github.com/MyGitName/%id%/releases/download/v%version%/%type%-%id%.zip') . '<br />' .
-        __('Note: on github, you must create a release and join to it the module zip file.') . '
-        </p>
-
-        </div>';
+        echo (new Div())->items([
+            (new Fieldset())->class('fieldset')->legend(new Legend(__('Interface')))->fields([
+                // s_active
+                (new Para())->items([
+                    (new Checkbox('ts_active', $s->active))->value(1),
+                    (new Label(__('Enable plugin'), Label::OUTSIDE_LABEL_AFTER))->for('ts_active')->class('classic'),
+                ]),
+                (new Note())->text(__('If enabled, new tab "Tweak stores" allows your to perfom actions relative to third-party repositories.'))->class('form-note'),
+                // s_file_pattern
+                (new Para())->items([
+                    (new Label(__('Predictable URL to zip file on the external repository')))->for('ts_file_pattern'),
+                    (new Input('ts_file_pattern'))->size(65)->maxlenght(255)->value($s->file_pattern),
+                ]),
+                (new Note())->text(__('You can use widcard like %author%, %type%, %id%, %version%.'))->class('form-note'),
+                (new Note())->text(__('For example on github https://github.com/MyGitName/%id%/releases/download/v%version%/%type%-%id%.zip'))->class('form-note'),
+                (new Note())->text(__('Note: on github, you must create a release and join to it the module zip file.'))->class('form-note'),
+            ]),
+            (new Fieldset())->class('fieldset')->legend(new Legend(__('Behaviors')))->fields([
+                // s_packman
+                (new Para())->items([
+                    (new Checkbox('ts_packman', $s->packman))->value(1),
+                    (new Label(__('Enable packman behaviors'), Label::OUTSIDE_LABEL_AFTER))->for('ts_packman')->class('classic'),
+                ]),
+                (new Note())->text(__('If enabled, plugin pacKman will (re)generate on the fly dcstore.xml file at root directory of the module.'))->class('form-note'),
+            ]),
+        ])->render();
     }
 }
