@@ -18,9 +18,9 @@ $this->registerModule(
     'Tweak stores',
     'Helper to manage external repositories',
     'Jean-Christian Denis and Contributors',
-    '0.6.1',
+    '0.7',
     [
-        'requires'    => [['core', '2.24']],
+        'requires'    => [['core', '2.26']],
         'permissions' => null,
         'type'        => 'plugin',
         'support'     => 'https://github.com/JcDenis/' . basename(__DIR__),

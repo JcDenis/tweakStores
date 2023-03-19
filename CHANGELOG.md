@@ -1,6 +1,14 @@
 dev
 - [ ] add update from external repositories
 
+0.7 - 2023.03.19
+- require PHP 8.1
+- require Dotclear 2.26
+- use namespace
+- use forms helpers
+- use modules Define
+- use dedicated settings class
+
 0.6.1 - 2023.01.07
 - fix previously introduced unix bug
 
