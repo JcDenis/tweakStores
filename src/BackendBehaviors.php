@@ -14,20 +14,22 @@ declare(strict_types=1);
 
 namespace Dotclear\Plugin\tweakStores;
 
-/* dotclear ns */
 use dcCore;
 use dcModuleDefine;
 use dcModules;
 use dcPage;
-
-/* clearbricks ns */
-use files;
-use form;
-use html;
-use text;
-use xmlTag;
-
-/* php ns */
+use Dotclear\Helper\File\Files;
+use Dotclear\Helper\Html\Form\{
+    Hidden,
+    Label,
+    Para,
+    Password,
+    Select,
+    Textarea
+};
+use Dotclear\Helper\Html\Html;
+use Dotclear\Helper\Html\XmlTag;
+use Dotclear\Helper\Text;
 use DOMDocument;
 use Exception;
 
@@ -83,10 +85,10 @@ class BackendBehaviors
 
         $module = $modules->getDefine($_POST['ts_id'] ?? '-');
         $combo  = self::comboModules($modules, $excludes);
-        $form   = '<p class="field"><label for="buildxml_id" class="classic required">' .
-            '<abbr title="' . __('Required field') . '">*</abbr> ' . __('Module to parse:') . '</label> ' .
-            form::combo('ts_id', $combo, $module->isDefined() ? html::escapeHTML($module->get('id')) : '-') .
-            '</p>';
+        $form   = (new Para())->class('field')->items([
+            (new Label(__('Module to parse:')))->for('ts_id')->class('required'),
+            (new Select('ts_id'))->default($module->isDefined() ? Html::escapeHTML($module->get('id')) : '-')->items($combo),
+        ])->render();
 
         # check dcstore repo
         $url = '';
@@ -107,10 +109,10 @@ class BackendBehaviors
                         curl_setopt($ch, CURLOPT_URL, $url);
                         curl_setopt($ch, CURLOPT_REFERER, $url);
                         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        $file_content = curl_exec($ch);
+                        $file_content = (string) curl_exec($ch);
                         curl_close($ch);
                     } else {
-                        $file_content = file_get_contents($url);
+                        $file_content = (string) file_get_contents($url);
                     }
                 } catch (Exception $e) {
                     $file_content = __('Failed to read third party repository');
@@ -169,11 +171,14 @@ class BackendBehaviors
             '<p>' . $url . '</p>' .
             (
                 empty($file_content) ? '' :
-                '<pre>' . form::textArea('file_xml', 165, 14, [
-                    'default'    => html::escapeHTML(self::prettyXML($file_content)),
-                    'class'      => 'maximal',
-                    'extra_html' => 'readonly="true"',
-                ]) . '</pre>' .
+                '<pre>' .
+                    (new Textarea('file_xml', Html::escapeHTML(self::prettyXML($file_content))))
+                    ->cols(165)
+                    ->rows(14)
+                    ->readonly(true)
+                    ->class('maximal')
+                    ->render() .
+                '</pre>' .
                 (
                     !$user_ui_colorsyntax ? '' :
                     dcPage::jsRunCodeMirror('editor', 'file_xml', 'dotclear', $user_ui_colorsyntax_theme)
@@ -201,7 +206,7 @@ class BackendBehaviors
         if (!empty($_POST['build_xml'])) {
             echo
             '<form method="post" action="' . $page_url . '" id="writexml" class="fieldset">' .
-            '<h4>' . sprintf(__('Generated code for module: %s'), html::escapeHTML($module->get('id'))) . '</h4>';
+            '<h4>' . sprintf(__('Generated code for module: %s'), Html::escapeHTML($module->get('id'))) . '</h4>';
 
             if (!empty(self::$failed)) {
                 echo '<p class="info">' . sprintf(__('Failed to parse XML code: %s'), implode(', ', self::$failed)) . '</p> ';
@@ -214,11 +219,14 @@ class BackendBehaviors
                     echo '<p class="info">' . __('Code is complete') . '</p>';
                 }
                 echo
-                '<pre>' . form::textArea('gen_xml', 165, 14, [
-                    'default'    => html::escapeHTML(self::prettyXML($xml_content)),
-                    'class'      => 'maximal',
-                    'extra_html' => 'readonly="true"',
-                ]) . '</pre>' .
+                '<pre>' .
+                    (new Textarea('gen_xml', Html::escapeHTML(self::prettyXML($xml_content))))
+                    ->cols(165)
+                    ->rows(14)
+                    ->readonly(true)
+                    ->class('maximal')
+                    ->render() .
+                '</pre>' .
                 (
                     !$user_ui_colorsyntax ? '' :
                     dcPage::jsRunCodeMirror('editor', 'gen_xml', 'dotclear', $user_ui_colorsyntax_theme)
@@ -229,19 +237,13 @@ class BackendBehaviors
                     && dcCore::app()->auth->isSuperAdmin()
                 ) {
                     echo
-                    '<p class="field"><label for="your_pwd2" class="classic required"><abbr title="' . __('Required field') . '">*</abbr> ' . __('Your password:') . '</label> ' .
-                    form::password(
-                        ['your_pwd', 'your_pwd2'],
-                        20,
-                        255,
-                        [
-                            'extra_html'   => 'required placeholder="' . __('Password') . '"',
-                            'autocomplete' => 'current-password',
-                        ]
-                    ) . '</p>' .
+                    (new Para())->class('field')->items([
+                        (new Label(__('Your password:')))->for('your_pwd2')->class('required'),
+                        (new Password(['your_pwd', 'your_pwd2']))->size(20)->maxlenght(255)->required(true)->placeholder(__('Password'))->autocomplete('current-password'),
+                    ])->render() .
                     '<p><input type="submit" name="write_xml" value="' . __('Save to module directory') . '" /> ' .
                     '<a class="hidden-if-no-js button" href="#' . My::id() . '" id="ts_copy_button">' . __('Copy to clipboard') . '</a>' .
-                    form::hidden('ts_id', $_POST['ts_id']) .
+                    (new Hidden('ts_id', $_POST['ts_id']))->render() .
                     dcCore::app()->formNonce() . '</p>';
                 }
                 echo sprintf(
@@ -273,7 +275,7 @@ class BackendBehaviors
 
     private static function parseFilePattern(dcModuleDefine $module, string $file_pattern): string
     {
-        return text::tidyURL(str_replace(
+        return Text::tidyURL(str_replace(
             [
                 '%type%',
                 '%id%',
@@ -292,7 +294,7 @@ class BackendBehaviors
 
     private static function generateXML(dcModuleDefine $module, string $file_pattern): string
     {
-        $rsp = new xmlTag('module');
+        $rsp = new XmlTag('module');
 
         self::$notice = [];
         self::$failed = [];
@@ -355,29 +357,29 @@ class BackendBehaviors
         if (empty($module->get('dc_min'))) {
             self::$notice[] = 'no minimum dotclear version';
         } else {
-            $rsp->insertNode(new xmlTag('da:dcmin', $module->get('dc_min')));
+            $rsp->insertNode(new XmlTag('da:dcmin', $module->get('dc_min')));
         }
 
         # details
         if (empty($module->get('details'))) {
             self::$notice[] = 'no details URL';
         } else {
-            $rsp->insertNode(new xmlTag('da:details', $module->get('details')));
+            $rsp->insertNode(new XmlTag('da:details', $module->get('details')));
         }
 
         # section
         if (!empty($module->get('section'))) {
-            $rsp->insertNode(new xmlTag('da:section', $module->get('section')));
+            $rsp->insertNode(new XmlTag('da:section', $module->get('section')));
         }
 
         # support
         if (empty($module->get('support'))) {
             self::$notice[] = 'no support URL';
         } else {
-            $rsp->insertNode(new xmlTag('da:support', $module->get('support')));
+            $rsp->insertNode(new XmlTag('da:support', $module->get('support')));
         }
 
-        $res = new xmlTag('modules', $rsp);
+        $res = new XmlTag('modules', $rsp);
         $res->insertAttr('xmlns:da', 'http://dotaddict.org/da/');
 
         return self::prettyXML($res->toXML());
@@ -395,7 +397,7 @@ class BackendBehaviors
         }
 
         try {
-            files::putContent($module->get('root') . DIRECTORY_SEPARATOR . 'dcstore.xml', $content);
+            Files::putContent($module->get('root') . DIRECTORY_SEPARATOR . 'dcstore.xml', $content);
         } catch (Exception $e) {
             self::$failed[] = $e->getMessage();
 

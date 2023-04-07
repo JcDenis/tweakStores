@@ -14,7 +14,6 @@ declare(strict_types=1);
 
 namespace Dotclear\Plugin\tweakStores;
 
-/* dotclear ns */
 use dcCore;
 use dcNsProcess;
 use dcPage;
@@ -28,8 +27,6 @@ use Dotclear\Helper\Html\Form\{
     Note,
     Para
 };
-
-/* php ns */
 use Exception;
 
 class Config extends dcNsProcess
@@ -94,7 +91,7 @@ class Config extends dcNsProcess
                 // s_file_pattern
                 (new Para())->items([
                     (new Label(__('Predictable URL to zip file on the external repository')))->for('ts_file_pattern'),
-                    (new Input('ts_file_pattern'))->size(65)->maxlenght(255)->value($s->file_pattern),
+                    (new Input('ts_file_pattern'))->size(65)->maxlenght(255)->class('maximal')->value($s->file_pattern),
                 ]),
                 (new Note())->text(__('You can use widcard like %author%, %type%, %id%, %version%.'))->class('form-note'),
                 (new Note())->text(__('For example on github https://github.com/MyGitName/%id%/releases/download/v%version%/%type%-%id%.zip'))->class('form-note'),
