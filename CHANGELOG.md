@@ -1,6 +1,13 @@
 dev
 - [ ] add update from external repositories
 
+0.7.1 - 2023.04.24
+- require PHP 8.1+
+- require Dotclear 2.26
+- use latest dotclear namespace
+- fix nullsafe warnings
+- add plugin Uninstaller features
+
 0.7 - 2023.03.19
 - require PHP 8.1
 - require Dotclear 2.26
