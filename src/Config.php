@@ -36,6 +36,7 @@ class Config extends dcNsProcess
         static::$init = My::phpCompliant()
             && defined('DC_CONTEXT_ADMIN')
             && defined('DC_CONTEXT_MODULE')
+            && !is_null(dcCore::app()->auth)
             && dcCore::app()->auth->isSuperAdmin();
 
         return static::$init;
@@ -61,7 +62,7 @@ class Config extends dcNsProcess
             dcPage::addSuccessNotice(
                 __('Configuration successfully updated')
             );
-            dcCore::app()->adminurl->redirect(
+            dcCore::app()->adminurl?->redirect(
                 'admin.plugins',
                 ['module' => My::id(), 'conf' => 1, 'redir' => dcCore::app()->admin->__get('list')->getRedir()]
             );

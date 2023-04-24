@@ -43,7 +43,7 @@ class BackendBehaviors
 
     public static function packmanBeforeCreatePackage(array $module): void
     {
-        if (!dcCore::app()->blog->settings->get(My::id())->get('packman')) {
+        if (is_null(dcCore::app()->blog) || !dcCore::app()->blog->settings->get(My::id())->get('packman')) {
             return;
         }
 
@@ -56,6 +56,10 @@ class BackendBehaviors
 
     public static function modulesToolsHeaders(bool $is_plugin): string
     {
+        if (is_null(dcCore::app()->auth) || is_null(dcCore::app()->auth->user_prefs)) {
+            return '';
+        }
+
         return
             dcPage::jsJson('ts_copied', ['alert' => __('Copied to clipboard')]) .
             dcPage::jsModuleLoad(My::id() . '/js/backend.js') .
@@ -68,16 +72,20 @@ class BackendBehaviors
 
     public static function pluginsToolsTabsV2(): void
     {
-        self::modulesToolsTabs(dcCore::app()->plugins, explode(',', DC_DISTRIB_PLUGINS), dcCore::app()->adminurl->get('admin.plugins'));
+        self::modulesToolsTabs(dcCore::app()->plugins, explode(',', DC_DISTRIB_PLUGINS), (string) dcCore::app()->adminurl?->get('admin.plugins'));
     }
 
     public static function themesToolsTabsV2(): void
     {
-        self::modulesToolsTabs(dcCore::app()->themes, explode(',', DC_DISTRIB_THEMES), dcCore::app()->adminurl->get('admin.blog.theme'));
+        self::modulesToolsTabs(dcCore::app()->themes, explode(',', DC_DISTRIB_THEMES), (string) dcCore::app()->adminurl?->get('admin.blog.theme'));
     }
 
     private static function modulesToolsTabs(dcModules $modules, array $excludes, string $page_url): void
     {
+        if (is_null(dcCore::app()->adminurl) || is_null(dcCore::app()->auth) || is_null(dcCore::app()->auth->user_prefs)) {
+            return;
+        }
+
         $page_url .= '#' . My::id();
         $user_ui_colorsyntax       = dcCore::app()->auth->user_prefs->get('interface')->get('colorsyntax');
         $user_ui_colorsyntax_theme = dcCore::app()->auth->user_prefs->get('interface')->get('colorsyntax_theme');
@@ -303,31 +311,31 @@ class BackendBehaviors
         if (!$module->isDefined()) {
             self::$failed[] = 'unknow module';
         }
-        $rsp->id = $module->get('id');
+        $rsp->insertAttr('id', $module->get('id'));
 
         # name
         if (empty($module->get('name'))) {
             self::$failed[] = 'no module name set in _define.php';
         }
-        $rsp->name($module->get('name'));
+        $rsp->insertNode(new XmlTag('name', $module->get('name')));
 
         # version
         if (empty($module->get('version'))) {
             self::$failed[] = 'no module version set in _define.php';
         }
-        $rsp->version($module->get('version'));
+        $rsp->insertNode(new XmlTag('version', $module->get('version')));
 
         # author
         if (empty($module->get('author'))) {
             self::$failed[] = 'no module author set in _define.php';
         }
-        $rsp->author($module->get('author'));
+        $rsp->insertNode(new XmlTag('author', $module->get('author')));
 
         # desc
         if (empty($module->get('desc'))) {
             self::$failed[] = 'no module description set in _define.php';
         }
-        $rsp->desc($module->get('desc'));
+        $rsp->insertNode(new XmlTag('desc', $module->get('desc')));
 
         # repository
         if (empty($module->get('repository'))) {
@@ -339,7 +347,7 @@ class BackendBehaviors
         if (empty($file_pattern)) {
             self::$failed[] = 'no zip file pattern set in Tweak Store configuration';
         }
-        $rsp->file($file_pattern);
+        $rsp->insertNode(new XmlTag('file', $file_pattern));
 
         # da dc_min or requires core
         if (!empty($module->get('requires')) && is_array($module->get('requires'))) {

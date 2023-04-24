@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Dotclear\Plugin\tweakStores;
 
 use dcCore;
+use Exception;
 
 class Settings
 {
@@ -32,6 +33,10 @@ class Settings
      */
     public function __construct()
     {
+        if (is_null(dcCore::app()->blog)) {
+            throw new Exception('blog is not set');
+        }
+
         $s = dcCore::app()->blog->settings->get(My::id());
 
         $this->active       = (bool) ($s->get('active') ?? false);
@@ -54,6 +59,10 @@ class Settings
      */
     public function writeSetting(string $key, mixed $value): bool
     {
+        if (is_null(dcCore::app()->blog)) {
+            throw new Exception('blog is not set');
+        }
+
         if (property_exists($this, $key) && settype($value, gettype($this->{$key})) === true) {
             dcCore::app()->blog->settings->get(My::id())->drop($key);
             dcCore::app()->blog->settings->get(My::id())->put($key, $value, gettype($this->{$key}), '', true, true);

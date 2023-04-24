@@ -21,8 +21,9 @@ class Backend extends dcNsProcess
 {
     public static function init(): bool
     {
-        static::$init = My::phpCompliant()
-            && defined('DC_CONTEXT_ADMIN')
+        static::$init = defined('DC_CONTEXT_ADMIN')
+            && !is_null(dcCore::app()->auth) && !is_null(dcCore::app()->blog)
+            && My::phpCompliant()
             && dcCore::app()->auth->isSuperAdmin()
             && dcCore::app()->blog->settings->get(My::id())->get('active');
 
