@@ -1,8 +1,15 @@
 dev
 - [ ] add update from external repositories
 
-0.7.1 - 2023.04.24
+0.8 - 2023.04.29
+- require Dotclear 2.26
 - require PHP 8.1+
+- add js code to for forms submits
+- move settings to modules tab
+- fix settings and remove 'active' setting
+- use only one modules list for all actions
+
+0.7.1 - 2023.04.24
 - require Dotclear 2.26
 - use latest dotclear namespace
 - fix nullsafe warnings

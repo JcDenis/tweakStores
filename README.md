@@ -20,7 +20,7 @@ It helps devs to manage dcstore.xml file.
 
   * superadmin permissions
   * Dotclear 2.26
-  * PHP >= 8.1
+  * PHP 8.1+
 
 ## USAGE
 
@@ -28,7 +28,6 @@ First install _tweakStores_, manualy from a zip package or from
 Dotaddict repository. (See Dotclear's documentation to know how do this)
 
 Manage plugins/themes dcstore.xml file from tab "store tools" on plugins/themes page.
-Manage settings from plugins configuration page.
 _tweakStores_ can interact with plugin pacKman to create .xml file at
 package creation.
 

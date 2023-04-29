@@ -2,10 +2,10 @@
 <modules xmlns:da="http://dotaddict.org/da/">
   <module id="tweakStores">
     <name>Tweak stores</name>
-    <version>0.7.1</version>
+    <version>0.8</version>
     <author>Jean-Christian Denis and Contributors</author>
     <desc>Helper to manage external repositories</desc>
-    <file>https://github.com/JcDenis/tweakStores/releases/download/v0.7.1/plugin-tweakStores.zip</file>
+    <file>https://github.com/JcDenis/tweakStores/releases/download/v0.8/plugin-tweakStores.zip</file>
     <da:dcmin>2.26</da:dcmin>
     <da:details>https://plugins.dotaddict.org/dc2/details/tweakStores</da:details>
     <da:support>https://github.com/JcDenis/tweakStores</da:support>
