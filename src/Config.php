@@ -35,7 +35,6 @@ class Config extends dcNsProcess
     {
         static::$init = My::phpCompliant()
             && defined('DC_CONTEXT_ADMIN')
-            && defined('DC_CONTEXT_MODULE')
             && !is_null(dcCore::app()->auth)
             && dcCore::app()->auth->isSuperAdmin();
 
