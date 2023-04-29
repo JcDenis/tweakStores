@@ -80,6 +80,6 @@ class Settings
      */
     public function listSettings(): array
     {
-        return array_keys(get_class_vars(Settings::class));
+        return get_object_vars($this);
     }
 }
