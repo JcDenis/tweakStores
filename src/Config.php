@@ -55,8 +55,8 @@ class Config extends dcNsProcess
         $s = new Settings();
 
         try {
-            foreach ($s->listSettings() as $key) {
-                $s->writeSetting($key, $_POST['ts_' . $key] ?? '');
+            foreach ($s->listSettings() as $key => $value) {
+                $s->writeSetting($key, $_POST['ts_' . $key] ?? $value);
             }
 
             dcPage::addSuccessNotice(
