@@ -19,9 +19,6 @@ use Exception;
 
 class Settings
 {
-    // Enable this plugin
-    public readonly bool $active;
-
     // Enable plugin pacKman behavior
     public readonly bool $packman;
 
@@ -39,14 +36,8 @@ class Settings
 
         $s = dcCore::app()->blog->settings->get(My::id());
 
-        $this->active       = (bool) ($s->get('active') ?? false);
         $this->packman      = (bool) ($s->get('packman') ?? false);
         $this->file_pattern = (string) ($s->get('file_pattern') ?? '');
-    }
-
-    public function getSetting(string $key): mixed
-    {
-        return $this->{$key} ?? null;
     }
 
     /**
@@ -57,7 +48,7 @@ class Settings
      *
      * @return  bool True on success
      */
-    public function writeSetting(string $key, mixed $value): bool
+    public function set(string $key, mixed $value): bool
     {
         if (is_null(dcCore::app()->blog)) {
             throw new Exception('blog is not set');
@@ -78,7 +69,7 @@ class Settings
      *
      * @return  array   The settings keys
      */
-    public function listSettings(): array
+    public function dump(): array
     {
         return get_object_vars($this);
     }

@@ -1,107 +1,115 @@
+# Language: Français
+# Module: tweakStores - 0.7.1
+# Date: 2023-04-29 13:33:18
+# Author: Jean-Christian Denis
+# Translated with translater 2023.04.23
+
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
-"Project-Id-Version: tweakStores 0.5\n"
+"Project-Id-Version: tweakStores 0.7.1\n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2023-01-06T08:29:42+00:00\n"
+"PO-Revision-Date: 2023-04-29T13:33:18+00:00\n"
 "Last-Translator: Jean-Christian Denis\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
+#: src/BackendBehaviors.php:89
 msgid "Copied to clipboard"
 msgstr "Copié dans le presse-papier"
 
-msgid "This module has no repository set in its _define.php file."
-msgstr "Ce module n'a aucun dépôt tiers définie dans son fichier _define.php"
-
-msgid "Failed to read third party repository"
-msgstr "Impossible de lire le dépôt tiers"
-
-msgid "Tweak third-party repositories"
-msgstr "Gestion de dépôts tiers"
-
-msgid "File successfully written"
-msgstr "Fichier enregistré avec succès"
-
-msgid "There is no module to tweak"
-msgstr "Il n'y a pas de module à gérer"
-
-msgid "Check repository"
-msgstr "Vérifier un dépôt tiers"
-
-msgid "This checks if dcstore.xml file is present on third party repository."
-msgstr "Ceci vérifie la présence du fichier dcstore.xml sur le dépôt tiers."
-
+#: src/BackendBehaviors.php:126
 msgid "Module to parse:"
 msgstr "Module à traiter :"
 
-msgid "Check"
-msgstr "Obtenir"
+#: src/BackendBehaviors.php:134
+msgid "This module has no repository set in its _define.php file."
+msgstr "Ce module n'a aucun dépôt tiers définie dans son fichier _define.php"
 
-msgid "Repositiory contents"
-msgstr "Contenu du dépôts tiers"
+#: src/BackendBehaviors.php:156
+msgid "Failed to read third party repository"
+msgstr "Impossible de lire le dépôt tiers"
 
-msgid "Generate xml code"
-msgstr "Générer le code XML"
+#: src/BackendBehaviors.php:179
+msgid "Tweak third-party repositories"
+msgstr "Gestion de dépôts tiers"
 
-msgid "You must configure zip file pattern to complete xml code automatically."
-msgstr "Vous devez configurer le modèle de fichier zip pour compléter le code XML automatiquement."
+#: src/BackendBehaviors.php:184
+msgid "There is no module to tweak"
+msgstr "Il n'y a pas de module à gérer"
 
-msgid "This helps to generate content of dcstore.xml for seleted module."
-msgstr "Ceci aide à générer le contenu du fichier dcstore.xml pour le module selectionné."
+#: src/BackendBehaviors.php:198
+msgid "Contents from distant repositiory"
+msgstr "Contenu provenant du dépôt distant"
 
-msgid "Generate"
-msgstr "Générer"
+#: src/BackendBehaviors.php:222
+msgid "Contents generated from local module definiton"
+msgstr "Contenu généré depuis la définition locale du module"
 
-msgid "Generated code for module: %s"
-msgstr "Code généré pour le module : %s"
-
+#: src/BackendBehaviors.php:225
 msgid "Failed to parse XML code: %s"
 msgstr "Impossible de traiter le code XML : %s"
 
+#: src/BackendBehaviors.php:228
 msgid "Code is not fully filled: %s"
 msgstr "Le code n'est pas complet : %s"
 
+#: src/BackendBehaviors.php:232
+msgid "File successfully writed"
+msgstr "Fichier écrit avec succès"
+
+#: src/BackendBehaviors.php:234
 msgid "Code is complete"
 msgstr "Le code est complet"
 
+#: src/BackendBehaviors.php:259
 msgid "Save to module directory"
 msgstr "Enregistrer dans le répertoire du module"
 
+#: src/BackendBehaviors.php:260
 msgid "Copy to clipboard"
 msgstr "Copier dans le presse-papier"
 
-msgid "You can edit zip file pattern from configuration page."
-msgstr "Vous pouvez modifier le modèle de fichier zip sur la page de configuration."
+#: src/BackendBehaviors.php:271
+msgid "Check"
+msgstr "Obtenir"
 
+#: src/BackendBehaviors.php:280
+msgid "You must configure zip file pattern to complete xml code automatically."
+msgstr "Vous devez configurer le modèle de fichier zip pour compléter le code XML automatiquement."
+
+#: src/BackendBehaviors.php:285
+msgid "Predictable URL to zip file on the external repository"
+msgstr "URL prédictive du fichier zip sur le dépôt externe"
+
+#: src/BackendBehaviors.php:288
+msgid "You can use widcard like %author%, %type%, %id%, %version%."
+msgstr "Vous pouvez utiliser les remplacements automatiques tels que %author%, %type%, %id%, %version%."
+
+#: src/BackendBehaviors.php:289
+msgid "For example on github https://github.com/MyGitName/%id%/releases/download/v%version%/%type%-%id%.zip"
+msgstr "Par exemple sur github https://github.com/MyGitName/%id%/releases/download/v%version%/%type%-%id%.zip"
+
+#: src/BackendBehaviors.php:290
+msgid "Note: on github, you must create a release and join to it the module zip file."
+msgstr "Note : sur github, vous devez créer un release et y joindre le fichier zip du module."
+
+#: src/BackendBehaviors.php:294
+msgid "Enable packman behaviors"
+msgstr "Activer les comportements avec pacKman"
+
+#: src/BackendBehaviors.php:296
+msgid "If enabled, plugin pacKman will (re)generate on the fly dcstore.xml file at root directory of the module."
+msgstr "Si activé, le plugin pacKman (re)génèrera à la volée le fichier dcstore.xml"
+
+#: src/BackendBehaviors.php:322
 msgid "Select a module"
 msgstr "Sélectionner un module"
 
 msgid "Enable plugin"
 msgstr "Activer le plugin"
-
-msgid "If enabled, new tab \"Tweak stores\" allows your to perfom actions relative to third-party repositories."
-msgstr "Si activé, un nouvel onglet \"Tweak stores\" vous permettra de mener des actions relatives aux dépôts tiers."
-
-msgid "Enable packman behaviors"
-msgstr "Activer les comportements avec pacKman"
-
-msgid "If enabled, plugin pacKman will (re)generate on the fly dcstore.xml file at root directory of the module."
-msgstr "Si activé, le plugin pacKman (re)génèrera à la volée le fichier dcstore.xml"
-
-msgid "Predictable URL to zip file on the external repository"
-msgstr "URL prédictive du fichier zip sur le dépôt externe"
-
-msgid "You can use widcard like %author%, %type%, %id%, %version%."
-msgstr "Vous pouvez utiliser les remplacements automatiques tels que %author%, %type%, %id%, %version%."
-
-msgid "For example on github https://github.com/MyGitName/%id%/releases/download/v%version%/%type%-%id%.zip"
-msgstr "Par exemple sur github https://github.com/MyGitName/%id%/releases/download/v%version%/%type%-%id%.zip"
-
-msgid "Note: on github, you must create a release and join to it the module zip file."
-msgstr "Note : sur github, vous devez créer un release et y joindre le fichier zip du module."
 
 msgid "Helper to manage external repositories"
 msgstr "Aide à la gestion de dépôts externes"

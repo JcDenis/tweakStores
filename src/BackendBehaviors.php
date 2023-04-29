@@ -20,11 +20,18 @@ use dcModules;
 use dcPage;
 use Dotclear\Helper\File\Files;
 use Dotclear\Helper\Html\Form\{
+    Checkbox,
+    Div,
+    Fieldset,
     Hidden,
+    Input,
     Label,
+    Legend,
+    Note,
     Para,
     Password,
     Select,
+    Submit,
     Textarea
 };
 use Dotclear\Helper\Html\Html;
@@ -54,14 +61,31 @@ class BackendBehaviors
         self::writeXML($define, dcCore::app()->blog->settings->get(My::id())->get('file_pattern'));
     }
 
-    public static function modulesToolsHeaders(bool $is_plugin): string
+    public static function modulesToolsHeaders(bool $is_theme): string
     {
         if (is_null(dcCore::app()->auth) || is_null(dcCore::app()->auth->user_prefs)) {
             return '';
         }
 
+        //save settings (before page header sent)
+        if (!empty($_POST['tweakstore_save'])) {
+            try {
+                $s = new Settings();
+                foreach ($s->dump() as $key => $value) {
+                    $s->set($key, $_POST['ts_' . $key] ?? $value);
+                }
+
+                dcPage::addSuccessNotice(
+                    __('Configuration successfully updated')
+                );
+                dcCore::app()->adminurl?->redirect($is_theme ? 'admin.blog.theme' : 'admin.plugins', ['tab' => My::id()]);
+            } catch (Exception $e) {
+                dcCore::app()->error->add($e->getMessage());
+            }
+        }
+
         return
-            dcPage::jsJson('ts_copied', ['alert' => __('Copied to clipboard')]) .
+            dcPage::jsJson('tweakstore_copied', ['alert' => __('Copied to clipboard')]) .
             dcPage::jsModuleLoad(My::id() . '/js/backend.js') .
             (
                 !dcCore::app()->auth->user_prefs->get('interface')->get('colorsyntax') ? '' :
@@ -72,38 +96,39 @@ class BackendBehaviors
 
     public static function pluginsToolsTabsV2(): void
     {
-        self::modulesToolsTabs(dcCore::app()->plugins, explode(',', DC_DISTRIB_PLUGINS), (string) dcCore::app()->adminurl?->get('admin.plugins'));
+        self::modulesToolsTabs(dcCore::app()->plugins, (string) dcCore::app()->adminurl?->get('admin.plugins'));
     }
 
     public static function themesToolsTabsV2(): void
     {
-        self::modulesToolsTabs(dcCore::app()->themes, explode(',', DC_DISTRIB_THEMES), (string) dcCore::app()->adminurl?->get('admin.blog.theme'));
+        self::modulesToolsTabs(dcCore::app()->themes, (string) dcCore::app()->adminurl?->get('admin.blog.theme'));
     }
 
-    private static function modulesToolsTabs(dcModules $modules, array $excludes, string $page_url): void
+    private static function modulesToolsTabs(dcModules $modules, string $page_url): void
     {
         if (is_null(dcCore::app()->adminurl) || is_null(dcCore::app()->auth) || is_null(dcCore::app()->auth->user_prefs)) {
             return;
         }
 
+        // settings
+        $s = new Settings();
         $page_url .= '#' . My::id();
         $user_ui_colorsyntax       = dcCore::app()->auth->user_prefs->get('interface')->get('colorsyntax');
         $user_ui_colorsyntax_theme = dcCore::app()->auth->user_prefs->get('interface')->get('colorsyntax_theme');
-        $file_pattern              = (new Settings())->file_pattern;
+        $file_pattern              = $s->file_pattern;
+        $local_content             = $distant_content = '';
 
-        $module = $modules->getDefine($_POST['ts_id'] ?? '-');
-        $combo  = self::comboModules($modules, $excludes);
-        $form   = (new Para())->class('field')->items([
-            (new Label(__('Module to parse:')))->for('ts_id')->class('required'),
-            (new Select('ts_id'))->default($module->isDefined() ? Html::escapeHTML($module->get('id')) : '-')->items($combo),
-        ])->render();
+        // load module
+        $module = $modules->getDefine($_POST['tweakstore_id'] ?? '0');
+        $combo  = self::comboModules($modules);
 
-        # check dcstore repo
+        // execute form actions
         $url = '';
-        if (!empty($_POST['check_xml']) && $module->isDefined()) {
+        if (!empty($_POST['tweakstore_do']) && $module->isDefined()) {
             if (empty($module->get('repository'))) {
                 $url = __('This module has no repository set in its _define.php file.');
             } else {
+                // read distant module xml content
                 try {
                     $url = $module->get('repository');
                     if (false === strpos($url, 'dcstore.xml')) {
@@ -117,70 +142,63 @@ class BackendBehaviors
                         curl_setopt($ch, CURLOPT_URL, $url);
                         curl_setopt($ch, CURLOPT_REFERER, $url);
                         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                        $file_content = (string) curl_exec($ch);
+                        $distant_content = (string) curl_exec($ch);
                         curl_close($ch);
                     } else {
-                        $file_content = (string) file_get_contents($url);
+                        $distant_content = (string) file_get_contents($url);
                     }
                 } catch (Exception $e) {
-                    $file_content = __('Failed to read third party repository');
+                    $distant_content = __('Failed to read third party repository');
+                }
+            }
+
+            // generate local module xml content
+            $local_content = self::generateXML($module, $s->file_pattern);
+
+            // write dcstore.xml file
+            if (!empty($_POST['tweakstore_write'])) {
+                if (empty($_POST['your_pwd']) || !dcCore::app()->auth->checkPassword($_POST['your_pwd'])) {
+                    dcCore::app()->error->add(__('Password verification failed'));
+                } else {
+                    self::writeXML($module, $s->file_pattern);
+                    if (!empty(self::$failed)) {
+                        dcCore::app()->error->add(implode(' ', self::$failed));
+                    }
                 }
             }
         }
 
-        # generate xml code
-        if (!empty($_POST['build_xml']) && $module->isDefined()) {
-            $xml_content = self::generateXML($module, $file_pattern);
-        }
-
-        # write dcstore.xml file
-        if (!empty($_POST['write_xml'])) {
-            if (empty($_POST['your_pwd']) || !dcCore::app()->auth->checkPassword($_POST['your_pwd'])) {
-                dcCore::app()->error->add(__('Password verification failed'));
-            } else {
-                $ret = self::writeXML($module, $file_pattern);
-                if (!empty(self::$failed)) {
-                    dcCore::app()->error->add(implode(' ', self::$failed));
-                }
-            }
-        }
+        // display
         echo
         '<div class="multi-part" id="' . My::id() . '" title="' . My::name() . '">' .
         '<h3>' . __('Tweak third-party repositories') . '</h3>';
 
-        if (!empty($_POST['write_xml'])) {
-            if (dcCore::app()->error->flag()) {
-                echo dcCore::app()->error->toHTML();
-            } else {
-                echo '<p class="success">' . __('File successfully written') . '</p>';
-            }
-        }
+        // nothing to display
         if (count($combo) < 2) {
             echo
-            '<div class="info">' . __('There is no module to tweak') . '</div>' .
+            '<p class="warning">' . __('There is no module to tweak') . '</p> ' .
             '</div>';
 
             return;
         }
 
         echo
-        '<form method="post" action="' . $page_url . '" id="checkxml" class="fieldset">' .
-        '<h4>' . __('Check repository') . '</h4>' .
-        '<p>' . __('This checks if dcstore.xml file is present on third party repository.') . '</p>' .
-        $form .
-        '<p><input type="submit" name="check_xml" value="' . __('Check') . '" />' .
-        dcCore::app()->formNonce() . '</p>' .
-        '</form>';
+        '<form method="post" action="' . $page_url . '" id="tweakstore_form">' .
+        (new Para())->class('field')->items([
+            (new Label(__('Module to parse:')))->for('tweakstore_id')->class('required'),
+            (new Select('tweakstore_id'))->default($module->isDefined() ? Html::escapeHTML($module->getId()) : '0')->items($combo),
+        ])->render();
 
+        // distant content
         if (!empty($url)) {
             echo
             '<div class="fieldset">' .
-            '<h4>' . __('Repositiory contents') . '</h4>' .
+            '<h4>' . __('Contents from distant repositiory') . '</h4>' .
             '<p>' . $url . '</p>' .
             (
-                empty($file_content) ? '' :
+                empty($distant_content) ? '' :
                 '<pre>' .
-                    (new Textarea('file_xml', Html::escapeHTML(self::prettyXML($file_content))))
+                    (new Textarea('distant_content', Html::escapeHTML(self::prettyXML($distant_content))))
                     ->cols(165)
                     ->rows(14)
                     ->readonly(true)
@@ -189,96 +207,117 @@ class BackendBehaviors
                 '</pre>' .
                 (
                     !$user_ui_colorsyntax ? '' :
-                    dcPage::jsRunCodeMirror('editor', 'file_xml', 'dotclear', $user_ui_colorsyntax_theme)
+                    dcPage::jsRunCodeMirror('editor', 'distant_content', 'dotclear', $user_ui_colorsyntax_theme)
                 )
             ) .
             '</div>';
         }
 
-        if (empty($file_pattern)) {
-            echo sprintf(
-                '<div class="fieldset"><h4>' . __('Generate xml code') . '</h4><p class="info"><a href="%s">%s</a></p></div>',
-                dcCore::app()->adminurl->get('admin.plugins', ['module' => My::id(), 'conf' => 1, 'redir' => $page_url]),
-                __('You must configure zip file pattern to complete xml code automatically.')
-            );
-        } else {
+        // local_content
+        if (!empty($local_content) || !empty(self::$failed) || !empty(self::$notice)) {
             echo
-            '<form method="post" action="' . $page_url . '" id="buildxml" class="fieldset">' .
-            '<h4>' . __('Generate xml code') . '</h4>' .
-            '<p>' . __('This helps to generate content of dcstore.xml for seleted module.') . '</p>' .
-            $form .
-            '<p><input type="submit" name="build_xml" value="' . __('Generate') . '" />' .
-            dcCore::app()->formNonce() . '</p>' .
-            '</form>';
-        }
-        if (!empty($_POST['build_xml'])) {
-            echo
-            '<form method="post" action="' . $page_url . '" id="writexml" class="fieldset">' .
-            '<h4>' . sprintf(__('Generated code for module: %s'), Html::escapeHTML($module->get('id'))) . '</h4>';
+            '<div class="fieldset">' .
+            '<h4>' . __('Contents generated from local module definiton') . '</h4>';
 
             if (!empty(self::$failed)) {
-                echo '<p class="info">' . sprintf(__('Failed to parse XML code: %s'), implode(', ', self::$failed)) . '</p> ';
+                echo '<p class="warning">' . sprintf(__('Failed to parse XML code: %s'), implode(', ', self::$failed)) . '</p> ';
             }
             if (!empty(self::$notice)) {
-                echo '<p class="info">' . sprintf(__('Code is not fully filled: %s'), implode(', ', self::$notice)) . '</p> ';
+                echo '<p class="warning">' . sprintf(__('Code is not fully filled: %s'), implode(', ', self::$notice)) . '</p> ';
             }
-            if (!empty($xml_content)) {
-                if (empty(self::$failed) && empty(self::$notice)) {
-                    echo '<p class="info">' . __('Code is complete') . '</p>';
+            if (empty(self::$failed) && empty(self::$notice)) {
+                if (!empty($_POST['tweakstore_write'])) {
+                    echo '<p class="info">' . __('File successfully writed') . '</p> ';
                 }
-                echo
-                '<pre>' .
-                    (new Textarea('gen_xml', Html::escapeHTML(self::prettyXML($xml_content))))
-                    ->cols(165)
-                    ->rows(14)
-                    ->readonly(true)
-                    ->class('maximal')
-                    ->render() .
-                '</pre>' .
-                (
-                    !$user_ui_colorsyntax ? '' :
-                    dcPage::jsRunCodeMirror('editor', 'gen_xml', 'dotclear', $user_ui_colorsyntax_theme)
-                );
+                echo '<p class="info">' . __('Code is complete') . '</p> ';
+            }
 
-                if (empty(self::$failed)
-                    && $module->get('root_writable')
-                    && dcCore::app()->auth->isSuperAdmin()
-                ) {
-                    echo
-                    (new Para())->class('field')->items([
-                        (new Label(__('Your password:')))->for('your_pwd2')->class('required'),
-                        (new Password(['your_pwd', 'your_pwd2']))->size(20)->maxlenght(255)->required(true)->placeholder(__('Password'))->autocomplete('current-password'),
-                    ])->render() .
-                    '<p><input type="submit" name="write_xml" value="' . __('Save to module directory') . '" /> ' .
-                    '<a class="hidden-if-no-js button" href="#' . My::id() . '" id="ts_copy_button">' . __('Copy to clipboard') . '</a>' .
-                    (new Hidden('ts_id', $_POST['ts_id']))->render() .
-                    dcCore::app()->formNonce() . '</p>';
-                }
-                echo sprintf(
-                    '<p class="info"><a href="%s">%s</a></p>',
-                    dcCore::app()->adminurl->get('admin.plugins', ['module' => My::id(), 'conf' => 1, 'redir' => $page_url]),
-                    __('You can edit zip file pattern from configuration page.')
-                );
-            }
             echo
-            '</form>';
+            '<pre>' .
+                (new Textarea('local_content', Html::escapeHTML(self::prettyXML($local_content))))
+                ->cols(165)
+                ->rows(14)
+                ->readonly(true)
+                ->class('maximal')
+                ->render() .
+            '</pre>' .
+            (
+                !$user_ui_colorsyntax ? '' :
+                dcPage::jsRunCodeMirror('editor', 'local_content', 'dotclear', $user_ui_colorsyntax_theme)
+            );
+
+            if ($module->get('root_writable')
+                && dcCore::app()->auth->isSuperAdmin()
+            ) {
+                echo
+                (new Para())->class('field')->items([
+                    (new Label(__('Your password:')))->for('tweakstore_pwd')->class('required'),
+                    (new Password(['your_pwd', 'tweakstore_pwd']))->size(20)->maxlenght(255)->required(true)->placeholder(__('Password'))->autocomplete('current-password'),
+                ])->render() .
+                '<p><input type="submit" name="tweakstore_write" id="tweakstore_write" value="' . __('Save to module directory') . '" /> ' .
+                '<a class="hidden-if-no-js button" href="#' . My::id() . '" id="tweakstore_copy">' . __('Copy to clipboard') . '</a>' .
+                dcCore::app()->formNonce() . '</p>';
+            }
+
+            echo
+            '</div>';
         }
+
+        // submit form button (hide by js)
         echo
+        (new Para())->items([
+            (new Submit('tweakstore_submit'))->value(__('Check')),
+            (new Hidden('tweakstore_do', '1')),
+            dcCore::app()->formNonce(false),
+        ])->render() .
+        '</form>' .
+
+        // settings
+        '<form method="post" action="' . $page_url . '" id="tweakstore_setting">' .
+        '<div class="fieldset"><h4>' . sprintf(__('%s configuration'), My::name()) . '</h4>' .
+        (empty($s->file_pattern) ? '<p class="warning">' . __('You must configure zip file pattern to complete xml code automatically.') . '</p>' : '') .
+
+        (new Div())->items([
+            // s_file_pattern
+            (new Para())->items([
+                (new Label(__('Predictable URL to zip file on the external repository')))->for('ts_file_pattern'),
+                (new Input('ts_file_pattern'))->size(65)->maxlenght(255)->class('maximal')->value($s->file_pattern),
+            ]),
+            (new Note())->text(__('You can use widcard like %author%, %type%, %id%, %version%.'))->class('form-note'),
+            (new Note())->text(__('For example on github https://github.com/MyGitName/%id%/releases/download/v%version%/%type%-%id%.zip'))->class('form-note'),
+            (new Note())->text(__('Note: on github, you must create a release and join to it the module zip file.'))->class('form-note'),
+            // s_packman
+            (new Para())->items([
+                (new Checkbox('ts_packman', $s->packman))->value(1),
+                (new Label(__('Enable packman behaviors'), Label::OUTSIDE_LABEL_AFTER))->for('ts_packman')->class('classic'),
+            ]),
+            (new Note())->text(__('If enabled, plugin pacKman will (re)generate on the fly dcstore.xml file at root directory of the module.'))->class('form-note'),
+        ])->render() .
+
+        (new Para())->items([
+            (new Submit('tweakstore_save'))->value(__('Save')),
+            dcCore::app()->formNonce(false),
+        ])->render() .
+
+        '</div>' .
+        '</form>' .
         '</div>';
     }
 
     # create list of module for combo and remove official modules
-    private static function comboModules(dcModules $modules, array $excludes): array
+    private static function comboModules(dcModules $modules): array
     {
-        $combo = [__('Select a module') => '0'];
+        $combo = [];
         foreach ($modules->getDefines() as $module) {
-            if (in_array($module->get('id'), $excludes)) {
+            if ($module->get('distributed')) {
                 continue;
             }
             $combo[$module->get('name') . ' ' . $module->get('version')] = $module->get('id');
         }
 
-        return $combo;
+        uasort($combo, fn ($a, $b) => strtolower($a) <=> strtolower($b));
+
+        return array_merge([__('Select a module') => '0'], $combo);
     }
 
     private static function parseFilePattern(dcModuleDefine $module, string $file_pattern): string
