@@ -21,7 +21,7 @@ $this->registerModule(
     '0.8',
     [
         'requires'    => [
-            ['php' => '8.1'],
+            ['php', '8.1'],
             ['core', '2.26'],
         ],
         'permissions' => null,
