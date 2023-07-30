@@ -14,9 +14,6 @@ declare(strict_types=1);
 
 namespace Dotclear\Plugin\tweakStores;
 
-use dcCore;
-use Exception;
-
 class Settings
 {
     // Enable plugin pacKman behavior
@@ -30,14 +27,8 @@ class Settings
      */
     public function __construct()
     {
-        if (is_null(dcCore::app()->blog)) {
-            throw new Exception('blog is not set');
-        }
-
-        $s = dcCore::app()->blog->settings->get(My::id());
-
-        $this->packman      = (bool) ($s->get('packman') ?? false);
-        $this->file_pattern = (string) ($s->get('file_pattern') ?? '');
+        $this->packman      = (bool) (My::settings()->get('packman') ?? false);
+        $this->file_pattern = (string) (My::settings()->get('file_pattern') ?? '');
     }
 
     /**
@@ -50,13 +41,9 @@ class Settings
      */
     public function set(string $key, mixed $value): bool
     {
-        if (is_null(dcCore::app()->blog)) {
-            throw new Exception('blog is not set');
-        }
-
         if (property_exists($this, $key) && settype($value, gettype($this->{$key})) === true) {
-            dcCore::app()->blog->settings->get(My::id())->drop($key);
-            dcCore::app()->blog->settings->get(My::id())->put($key, $value, gettype($this->{$key}), '', true, true);
+            My::settings()->drop($key);
+            My::settings()->put($key, $value, gettype($this->{$key}), '', true, true);
 
             return true;
         }

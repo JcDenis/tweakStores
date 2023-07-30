@@ -17,7 +17,10 @@ namespace Dotclear\Plugin\tweakStores;
 use dcCore;
 use dcModuleDefine;
 use dcModules;
-use dcPage;
+use Dotclear\Core\Backend\{
+    Notices,
+    Page
+};
 use Dotclear\Helper\File\Files;
 use Dotclear\Helper\Html\Form\{
     Checkbox,
@@ -42,15 +45,27 @@ use Exception;
 
 class BackendBehaviors
 {
-    /** @var array List of notice messages */
+    /** @var    array   List of notice messages */
     private static $notice = [];
 
-    /** @var array List of failed messages */
+    /** @var    array   List of failed messages */
     private static $failed = [];
+
+    /** @var    Settings    Module settings */
+    private static $settings;
+
+    private static function settings(): Settings
+    {
+        if (!(self::$settings instanceof Settings)) {
+            self::$settings = new Settings();
+        }
+
+        return self::$settings;
+    }
 
     public static function packmanBeforeCreatePackage(array $module): void
     {
-        if (is_null(dcCore::app()->blog) || !dcCore::app()->blog->settings->get(My::id())->get('packman')) {
+        if (self::settings()->packman) {
             return;
         }
 
@@ -58,64 +73,54 @@ class BackendBehaviors
         $modules = $module['type'] == 'theme' ? dcCore::app()->themes : dcCore::app()->plugins;
         $define  = $modules->getDefine($module['id']);
 
-        self::writeXML($define, dcCore::app()->blog->settings->get(My::id())->get('file_pattern'));
+        self::writeXML($define, self::settings()->file_pattern);
     }
 
     public static function modulesToolsHeaders(bool $is_theme): string
     {
-        if (is_null(dcCore::app()->auth) || is_null(dcCore::app()->auth->user_prefs)) {
-            return '';
-        }
-
         //save settings (before page header sent)
         if (!empty($_POST['tweakstore_save'])) {
             try {
-                $s = new Settings();
-                foreach ($s->dump() as $key => $value) {
-                    $s->set($key, $_POST['ts_' . $key] ?? $value);
+                foreach (self::settings()->dump() as $key => $value) {
+                    self::settings()->set($key, $_POST['ts_' . $key] ?? $value);
                 }
 
-                dcPage::addSuccessNotice(
+                Notices::addSuccessNotice(
                     __('Configuration successfully updated')
                 );
-                dcCore::app()->adminurl?->redirect($is_theme ? 'admin.blog.theme' : 'admin.plugins', ['tab' => My::id()]);
+                dcCore::app()->admin->url->redirect($is_theme ? 'admin.blog.theme' : 'admin.plugins', ['tab' => My::id()]);
             } catch (Exception $e) {
                 dcCore::app()->error->add($e->getMessage());
             }
         }
 
         return
-            dcPage::jsJson('tweakstore_copied', ['alert' => __('Copied to clipboard')]) .
-            dcPage::jsModuleLoad(My::id() . '/js/backend.js') .
+            Page::jsJson('tweakstore_copied', ['alert' => __('Copied to clipboard')]) .
+            My::jsLoad('backend') .
             (
                 !dcCore::app()->auth->user_prefs->get('interface')->get('colorsyntax') ? '' :
-                dcPage::jsLoadCodeMirror(dcCore::app()->auth->user_prefs->get('interface')->get('colorsyntax_theme')) .
-                dcPage::jsModuleLoad(My::id() . '/js/cms.js')
+                Page::jsLoadCodeMirror(dcCore::app()->auth->user_prefs->get('interface')->get('colorsyntax_theme')) .
+                My::jsLoad('cms')
             );
     }
 
     public static function pluginsToolsTabsV2(): void
     {
-        self::modulesToolsTabs(dcCore::app()->plugins, (string) dcCore::app()->adminurl?->get('admin.plugins'));
+        self::modulesToolsTabs(dcCore::app()->plugins, (string) dcCore::app()->admin->url->get('admin.plugins'));
     }
 
     public static function themesToolsTabsV2(): void
     {
-        self::modulesToolsTabs(dcCore::app()->themes, (string) dcCore::app()->adminurl?->get('admin.blog.theme'));
+        self::modulesToolsTabs(dcCore::app()->themes, (string) dcCore::app()->admin->url->get('admin.blog.theme'));
     }
 
     private static function modulesToolsTabs(dcModules $modules, string $page_url): void
     {
-        if (is_null(dcCore::app()->adminurl) || is_null(dcCore::app()->auth) || is_null(dcCore::app()->auth->user_prefs)) {
-            return;
-        }
-
         // settings
-        $s = new Settings();
         $page_url .= '#' . My::id();
         $user_ui_colorsyntax       = dcCore::app()->auth->user_prefs->get('interface')->get('colorsyntax');
         $user_ui_colorsyntax_theme = dcCore::app()->auth->user_prefs->get('interface')->get('colorsyntax_theme');
-        $file_pattern              = $s->file_pattern;
+        $file_pattern              = self::settings()->file_pattern;
         $local_content             = $distant_content = '';
 
         // load module
@@ -153,14 +158,14 @@ class BackendBehaviors
             }
 
             // generate local module xml content
-            $local_content = self::generateXML($module, $s->file_pattern);
+            $local_content = self::generateXML($module, self::settings()->file_pattern);
 
             // write dcstore.xml file
             if (!empty($_POST['tweakstore_write'])) {
                 if (empty($_POST['your_pwd']) || !dcCore::app()->auth->checkPassword($_POST['your_pwd'])) {
                     dcCore::app()->error->add(__('Password verification failed'));
                 } else {
-                    self::writeXML($module, $s->file_pattern);
+                    self::writeXML($module, self::settings()->file_pattern);
                     if (!empty(self::$failed)) {
                         dcCore::app()->error->add(implode(' ', self::$failed));
                     }
@@ -207,7 +212,7 @@ class BackendBehaviors
                 '</pre>' .
                 (
                     !$user_ui_colorsyntax ? '' :
-                    dcPage::jsRunCodeMirror('editor', 'distant_content', 'dotclear', $user_ui_colorsyntax_theme)
+                    Page::jsRunCodeMirror('editor', 'distant_content', 'dotclear', $user_ui_colorsyntax_theme)
                 )
             ) .
             '</div>';
@@ -243,7 +248,7 @@ class BackendBehaviors
             '</pre>' .
             (
                 !$user_ui_colorsyntax ? '' :
-                dcPage::jsRunCodeMirror('editor', 'local_content', 'dotclear', $user_ui_colorsyntax_theme)
+                Page::jsRunCodeMirror('editor', 'local_content', 'dotclear', $user_ui_colorsyntax_theme)
             );
 
             if ($module->get('root_writable')
@@ -275,20 +280,20 @@ class BackendBehaviors
         // settings
         '<form method="post" action="' . $page_url . '" id="tweakstore_setting">' .
         '<div class="fieldset"><h4>' . sprintf(__('%s configuration'), My::name()) . '</h4>' .
-        (empty($s->file_pattern) ? '<p class="warning">' . __('You must configure zip file pattern to complete xml code automatically.') . '</p>' : '') .
+        (empty(self::settings()->file_pattern) ? '<p class="warning">' . __('You must configure zip file pattern to complete xml code automatically.') . '</p>' : '') .
 
         (new Div())->items([
             // s_file_pattern
             (new Para())->items([
                 (new Label(__('Predictable URL to zip file on the external repository')))->for('ts_file_pattern'),
-                (new Input('ts_file_pattern'))->size(65)->maxlenght(255)->class('maximal')->value($s->file_pattern),
+                (new Input('ts_file_pattern'))->size(65)->maxlenght(255)->class('maximal')->value(self::settings()->file_pattern),
             ]),
             (new Note())->text(__('You can use widcard like %author%, %type%, %id%, %version%.'))->class('form-note'),
             (new Note())->text(__('For example on github https://github.com/MyGitName/%id%/releases/download/v%version%/%type%-%id%.zip'))->class('form-note'),
             (new Note())->text(__('Note: on github, you must create a release and join to it the module zip file.'))->class('form-note'),
             // s_packman
             (new Para())->items([
-                (new Checkbox('ts_packman', $s->packman))->value(1),
+                (new Checkbox('ts_packman', self::settings()->packman))->value(1),
                 (new Label(__('Enable packman behaviors'), Label::OUTSIDE_LABEL_AFTER))->for('ts_packman')->class('classic'),
             ]),
             (new Note())->text(__('If enabled, plugin pacKman will (re)generate on the fly dcstore.xml file at root directory of the module.'))->class('form-note'),

@@ -1,6 +1,11 @@
 dev
 - [ ] add update from external repositories
 
+0.9 - 2023.07.30
+- require Dotclear 2.27
+- require PHP 8.1+
+- update to Dotclear 2.27-dev
+
 0.8 - 2023.04.29
 - require Dotclear 2.26
 - require PHP 8.1+
