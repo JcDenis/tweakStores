@@ -1,25 +1,30 @@
 <?php
-/**
- * @brief tweakStores, a plugin for Dotclear 2
- *
- * @package Dotclear
- * @subpackage Plugin
- *
- * @author Jean-Christian Denis and Contributors
- *
- * @copyright Jean-Christian Denis
- * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
- */
+
 declare(strict_types=1);
 
 namespace Dotclear\Plugin\tweakStores;
 
+/**
+ * @brief       tweakStores settings helper.
+ * @ingroup     tweakStores
+ *
+ * @author      Jean-Christian Denis
+ * @copyright   GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
+ */
 class Settings
 {
-    // Enable plugin pacKman behavior
+    /**
+     * Enable plugin pacKman behavior.
+     *
+     * @var     bool    $packman
+     */
     public readonly bool $packman;
 
-    // Predictable dcstore url
+    /**
+     * Predictable dcstore url.
+     *
+     * @var     string  $v
+     */
     public readonly string $file_pattern;
 
     /**
@@ -37,7 +42,7 @@ class Settings
      * @param   string  $key    The setting ID
      * @param   mixed   $value  The setting value
      *
-     * @return  bool True on success
+     * @return  bool    True on success
      */
     public function set(string $key, mixed $value): bool
     {
@@ -54,7 +59,7 @@ class Settings
     /**
      * List defined settings keys
      *
-     * @return  array   The settings keys
+     * @return  array<string, bool|string>  The settings keys
      */
     public function dump(): array
     {

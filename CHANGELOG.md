@@ -1,3 +1,10 @@
+tweakStores 1.1 - 2023.10.21
+===========================================================
+* Require Dotclear 2.28
+* Require PHP 8.1
+* Upgrade to Dotclear 2.28
+* Code review (phpstan)
+
 tweakStores 1.0 - 2023.08.14
 ===========================================================
 * Require Dotclear 2.27

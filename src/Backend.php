@@ -1,22 +1,19 @@
 <?php
-/**
- * @brief tweakStores, a plugin for Dotclear 2
- *
- * @package Dotclear
- * @subpackage Plugin
- *
- * @author Jean-Christian Denis and Contributors
- *
- * @copyright Jean-Christian Denis
- * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
- */
+
 declare(strict_types=1);
 
 namespace Dotclear\Plugin\tweakStores;
 
-use dcCore;
+use Dotclear\App;
 use Dotclear\Core\Process;
 
+/**
+ * @brief       tweakStores backend class.
+ * @ingroup     tweakStores
+ *
+ * @author      Jean-Christian Denis
+ * @copyright   GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
+ */
 class Backend extends Process
 {
     public static function init(): bool
@@ -30,15 +27,15 @@ class Backend extends Process
             return false;
         }
 
-        dcCore::app()->addBehaviors([
+        App::behavior()->addBehaviors([
             // addd some js
-            'pluginsToolsHeadersV2' => [BackendBehaviors::class, 'modulesToolsHeaders'],
-            'themesToolsHeadersV2'  => [BackendBehaviors::class, 'modulesToolsHeaders'],
+            'pluginsToolsHeadersV2' => BackendBehaviors::modulesToolsHeaders(...),
+            'themesToolsHeadersV2'  => BackendBehaviors::modulesToolsHeaders(...),
             // admin modules page tab
-            'pluginsToolsTabsV2' => [BackendBehaviors::class, 'pluginsToolsTabsV2'],
-            'themesToolsTabsV2'  => [BackendBehaviors::class, 'themesToolsTabsV2'],
+            'pluginsToolsTabsV2' => BackendBehaviors::pluginsToolsTabsV2(...),
+            'themesToolsTabsV2'  => BackendBehaviors::themesToolsTabsV2(...),
             // add to plugin pacKman
-            'packmanBeforeCreatePackage' => [BackendBehaviors::class, 'packmanBeforeCreatePackage'],
+            'packmanBeforeCreatePackage' => BackendBehaviors::packmanBeforeCreatePackage(...),
         ]);
 
         return true;

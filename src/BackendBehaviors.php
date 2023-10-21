@@ -1,22 +1,12 @@
 <?php
-/**
- * @brief tweakStores, a plugin for Dotclear 2
- *
- * @package Dotclear
- * @subpackage Plugin
- *
- * @author Jean-Christian Denis and Contributors
- *
- * @copyright Jean-Christian Denis
- * @copyright GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
- */
+
 declare(strict_types=1);
 
 namespace Dotclear\Plugin\tweakStores;
 
-use dcCore;
-use dcModuleDefine;
-use dcModules;
+use Dotclear\App;
+use Dotclear\Module\ModuleDefine;
+use Dotclear\Interface\Module\ModulesInterface;
 use Dotclear\Core\Backend\{
     Notices,
     Page
@@ -43,17 +33,41 @@ use Dotclear\Helper\Text;
 use DOMDocument;
 use Exception;
 
+/**
+ * @brief       tweakStores backend behaviors class.
+ * @ingroup     tweakStores
+ *
+ * @author      Jean-Christian Denis
+ * @copyright   GPL-2.0 https://www.gnu.org/licenses/gpl-2.0.html
+ */
 class BackendBehaviors
 {
-    /** @var    array   List of notice messages */
+    /**
+     * List of notice messages.
+     *
+     * @var     array<int, string>  $notice
+     */
     private static $notice = [];
 
-    /** @var    array   List of failed messages */
+    /**
+     * List of failed messages.
+     *
+     * @var     array<int, string>  $failed
+     */
     private static $failed = [];
 
-    /** @var    Settings    Module settings */
+    /**
+     * Module settings.
+     *
+     * @var     Settings    $settings
+     */
     private static $settings;
 
+    /**
+     * Get settings instance.
+     *
+     * @return  Settings    Settings helper instance
+     */
     private static function settings(): Settings
     {
         if (!(self::$settings instanceof Settings)) {
@@ -63,6 +77,13 @@ class BackendBehaviors
         return self::$settings;
     }
 
+    /**
+     * Plugin pacKman behavior.
+     *
+     * Add dcstore.xml file on the fly on pacKman package creation.
+     *
+     * @param   array<string, string>   $module
+     */
     public static function packmanBeforeCreatePackage(array $module): void
     {
         if (self::settings()->packman) {
@@ -70,27 +91,37 @@ class BackendBehaviors
         }
 
         // move from array to dcModuleDefine object
-        $modules = $module['type'] == 'theme' ? dcCore::app()->themes : dcCore::app()->plugins;
+        $modules = $module['type'] == 'theme' ? App::themes() : App::plugins();
         $define  = $modules->getDefine($module['id']);
 
         self::writeXML($define, self::settings()->file_pattern);
     }
 
+    /**
+     * Add list headers and save settings.
+     *
+     * @param   bool    $is_theme   Is on themes list
+     *
+     * @return  string  HTML header code
+     */
     public static function modulesToolsHeaders(bool $is_theme): string
     {
         //save settings (before page header sent)
         if (!empty($_POST['tweakstore_save'])) {
             try {
                 foreach (self::settings()->dump() as $key => $value) {
+                    if (!is_string($key)) {
+                        continue;
+                    }
                     self::settings()->set($key, $_POST['ts_' . $key] ?? $value);
                 }
 
                 Notices::addSuccessNotice(
                     __('Configuration successfully updated')
                 );
-                dcCore::app()->admin->url->redirect($is_theme ? 'admin.blog.theme' : 'admin.plugins', ['tab' => My::id()]);
+                App::backend()->url()->redirect($is_theme ? 'admin.blog.theme' : 'admin.plugins', ['tab' => My::id()]);
             } catch (Exception $e) {
-                dcCore::app()->error->add($e->getMessage());
+                App::error()->add($e->getMessage());
             }
         }
 
@@ -98,28 +129,40 @@ class BackendBehaviors
             Page::jsJson('tweakstore_copied', ['alert' => __('Copied to clipboard')]) .
             My::jsLoad('backend') .
             (
-                !dcCore::app()->auth->user_prefs->get('interface')->get('colorsyntax') ? '' :
-                Page::jsLoadCodeMirror(dcCore::app()->auth->user_prefs->get('interface')->get('colorsyntax_theme')) .
+                !App::auth()->prefs()->get('interface')->get('colorsyntax') ? '' :
+                Page::jsLoadCodeMirror(App::auth()->prefs()->get('interface')->get('colorsyntax_theme')) .
                 My::jsLoad('cms')
             );
     }
 
+    /**
+     * Plugins tab.
+     */
     public static function pluginsToolsTabsV2(): void
     {
-        self::modulesToolsTabs(dcCore::app()->plugins, (string) dcCore::app()->admin->url->get('admin.plugins'));
+        self::modulesToolsTabs(App::plugins(), (string) App::backend()->url()->get('admin.plugins'));
     }
 
+    /**
+     * Themes tab.
+     */
     public static function themesToolsTabsV2(): void
     {
-        self::modulesToolsTabs(dcCore::app()->themes, (string) dcCore::app()->admin->url->get('admin.blog.theme'));
+        self::modulesToolsTabs(App::themes(), (string) App::backend()->url()->get('admin.blog.theme'));
     }
 
-    private static function modulesToolsTabs(dcModules $modules, string $page_url): void
+    /**
+     * Modules tab.
+     *
+     * @param   ModulesInterface    $modules    The modules
+     * @param   string              $page_url   The page URL
+     */
+    private static function modulesToolsTabs(ModulesInterface $modules, string $page_url): void
     {
         // settings
         $page_url .= '#' . My::id();
-        $user_ui_colorsyntax       = dcCore::app()->auth->user_prefs->get('interface')->get('colorsyntax');
-        $user_ui_colorsyntax_theme = dcCore::app()->auth->user_prefs->get('interface')->get('colorsyntax_theme');
+        $user_ui_colorsyntax       = App::auth()->prefs()->get('interface')->get('colorsyntax');
+        $user_ui_colorsyntax_theme = App::auth()->prefs()->get('interface')->get('colorsyntax_theme');
         $file_pattern              = self::settings()->file_pattern;
         $local_content             = $distant_content = '';
 
@@ -162,12 +205,12 @@ class BackendBehaviors
 
             // write dcstore.xml file
             if (!empty($_POST['tweakstore_write'])) {
-                if (empty($_POST['your_pwd']) || !dcCore::app()->auth->checkPassword($_POST['your_pwd'])) {
-                    dcCore::app()->error->add(__('Password verification failed'));
+                if (empty($_POST['your_pwd']) || !App::auth()->checkPassword($_POST['your_pwd'])) {
+                    App::error()->add(__('Password verification failed'));
                 } else {
                     self::writeXML($module, self::settings()->file_pattern);
                     if (!empty(self::$failed)) {
-                        dcCore::app()->error->add(implode(' ', self::$failed));
+                        App::error()->add(implode(' ', self::$failed));
                     }
                 }
             }
@@ -252,7 +295,7 @@ class BackendBehaviors
             );
 
             if ($module->get('root_writable')
-                && dcCore::app()->auth->isSuperAdmin()
+                && App::auth()->isSuperAdmin()
             ) {
                 echo
                 (new Para())->class('field')->items([
@@ -261,7 +304,7 @@ class BackendBehaviors
                 ])->render() .
                 '<p><input type="submit" name="tweakstore_write" id="tweakstore_write" value="' . __('Save to module directory') . '" /> ' .
                 '<a class="hidden-if-no-js button" href="#' . My::id() . '" id="tweakstore_copy">' . __('Copy to clipboard') . '</a>' .
-                dcCore::app()->formNonce() . '</p>';
+                App::nonce()->getFormNonce() . '</p>';
             }
 
             echo
@@ -273,7 +316,7 @@ class BackendBehaviors
         (new Para())->items([
             (new Submit('tweakstore_submit'))->value(__('Check')),
             (new Hidden('tweakstore_do', '1')),
-            dcCore::app()->formNonce(false),
+            App::nonce()->formNonce(),
         ])->render() .
         '</form>' .
 
@@ -301,7 +344,7 @@ class BackendBehaviors
 
         (new Para())->items([
             (new Submit('tweakstore_save'))->value(__('Save')),
-            dcCore::app()->formNonce(false),
+            App::nonce()->formNonce(),
         ])->render() .
 
         '</div>' .
@@ -309,8 +352,12 @@ class BackendBehaviors
         '</div>';
     }
 
-    # create list of module for combo and remove official modules
-    private static function comboModules(dcModules $modules): array
+    /**
+     * Create list of module for combo and remove official modules.
+     *
+     * @return  array<string, string>
+     */
+    private static function comboModules(ModulesInterface $modules): array
     {
         $combo = [];
         foreach ($modules->getDefines() as $module) {
@@ -325,7 +372,15 @@ class BackendBehaviors
         return array_merge([__('Select a module') => '0'], $combo);
     }
 
-    private static function parseFilePattern(dcModuleDefine $module, string $file_pattern): string
+    /**
+     * Parse dcstore content.
+     *
+     * @param   ModuleDefine    $module         The module
+     * @param   string          $file_pattern   The file pattern
+     *
+     * @return  string  The parsed file content
+     */
+    private static function parseFilePattern(ModuleDefine $module, string $file_pattern): string
     {
         return Text::tidyURL(str_replace(
             [
@@ -344,7 +399,15 @@ class BackendBehaviors
         ));
     }
 
-    private static function generateXML(dcModuleDefine $module, string $file_pattern): string
+    /**
+     * Generate XML content from module.
+     *
+     * @param   ModuleDefine    $module         The module
+     * @param   string          $file_pattern   The file pattern
+     *
+     * @return  string  The XML content
+     */
+    private static function generateXML(ModuleDefine $module, string $file_pattern): string
     {
         $rsp = new XmlTag('module');
 
@@ -358,10 +421,10 @@ class BackendBehaviors
         $rsp->insertAttr('id', $module->get('id'));
 
         # name
-        if (empty($module->get('name'))) {
+        if (empty($module->get('label'))) {
             self::$failed[] = 'no module name set in _define.php';
         }
-        $rsp->insertNode(new XmlTag('name', $module->get('name')));
+        $rsp->insertNode(new XmlTag('name', $module->get('label')));
 
         # version
         if (empty($module->get('version'))) {
@@ -437,7 +500,15 @@ class BackendBehaviors
         return self::prettyXML($res->toXML());
     }
 
-    private static function writeXML(dcModuleDefine $module, string $file_pattern): bool
+    /**
+     * Write XML content to dcstore file.
+     *
+     * @param   ModuleDefine    $module         The module
+     * @param   string          $file_pattern   The file pattern
+     *
+     * @return  bool    True on success
+     */
+    private static function writeXML(ModuleDefine $module, string $file_pattern): bool
     {
         self::$failed = [];
         if (!$module->get('root_writable')) {
@@ -459,6 +530,13 @@ class BackendBehaviors
         return true;
     }
 
+    /**
+     * Arrange XML content.
+     *
+     * @param   string  $str    The content
+     *
+     * @return  string  The pretty content
+     */
     private static function prettyXML(string $str): string
     {
         if (class_exists('DOMDocument')) {
