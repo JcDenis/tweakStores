@@ -19,6 +19,7 @@ class My extends MyPlugin
     public static function checkCustomContext(int $context): ?bool
     {
         return match ($context) {
+            // Limit ot super admin
             self::MODULE => App::auth()->isSuperAdmin(),
             default      => null,
         };

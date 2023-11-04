@@ -300,7 +300,7 @@ class BackendBehaviors
                 echo
                 (new Para())->class('field')->items([
                     (new Label(__('Your password:')))->for('tweakstore_pwd')->class('required'),
-                    (new Password(['your_pwd', 'tweakstore_pwd']))->size(20)->maxlenght(255)->required(true)->placeholder(__('Password'))->autocomplete('current-password'),
+                    (new Password(['your_pwd', 'tweakstore_pwd']))->size(20)->maxlength(255)->required(true)->placeholder(__('Password'))->autocomplete('current-password'),
                 ])->render() .
                 '<p><input type="submit" name="tweakstore_write" id="tweakstore_write" value="' . __('Save to module directory') . '" /> ' .
                 '<a class="hidden-if-no-js button" href="#' . My::id() . '" id="tweakstore_copy">' . __('Copy to clipboard') . '</a>' .
@@ -329,7 +329,7 @@ class BackendBehaviors
             // s_file_pattern
             (new Para())->items([
                 (new Label(__('Predictable URL to zip file on the external repository')))->for('ts_file_pattern'),
-                (new Input('ts_file_pattern'))->size(65)->maxlenght(255)->class('maximal')->value(self::settings()->file_pattern),
+                (new Input('ts_file_pattern'))->size(65)->maxlength(255)->class('maximal')->value(self::settings()->file_pattern),
             ]),
             (new Note())->text(__('You can use widcard like %author%, %type%, %id%, %version%.'))->class('form-note'),
             (new Note())->text(__('For example on github https://github.com/MyGitName/%id%/releases/download/v%version%/%type%-%id%.zip'))->class('form-note'),
